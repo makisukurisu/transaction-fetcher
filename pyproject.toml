@@ -1,0 +1,75 @@
+[project]
+name = "transaction-fetcher"
+version = "3.0.0"
+description = "A rewrite of cardInfo2 bot"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.28.1",
+    "pydantic-settings>=2.8.1",
+    "pydantic>=2.11.2",
+    "pytelegrambotapi>=4.26.0",
+    "rsa>=4.9",
+    "schedule>=1.2.2",
+    "sqlalchemy>=2.0.40",
+    "typer>=0.15.2",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.5",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+extend-select = [
+  "UP",
+  "E",
+  "W",
+  "I",
+  "C90",
+  "N",
+  "ANN",
+  "ASYNC",
+  "BLE",
+  "FBT",
+  "B",
+  "A",
+  "C4",
+  "DTZ",
+  "T10",
+  "FA",
+  "ISC",
+  "ICN",
+  "INP",
+  "PIE",
+  "T20",
+  "PYI",
+  "Q",
+  "RET",
+  "SLF",
+  "SIM",
+  "TID",
+  "TCH",
+  "ARG",
+  "TD",
+  "FIX",
+  "ERA",
+  "PL",
+  "RUF",
+]
+ignore = [
+  "ISC001",
+  "N999",
+  "ERA001",
+  "RUF012",
+  "FBT001",
+  "FBT002",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true

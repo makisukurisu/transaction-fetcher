@@ -1,0 +1,142 @@
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import Session, joinedload
+
+from logger import main_logger
+from models.transaction import TransactionModel
+from providers.account.get import get_provider_class
+from services.account import get_account_service
+
+if TYPE_CHECKING:
+    import sqlalchemy
+
+    from models.account import AccountModel
+    from schemas.transaction import TransactionSchema
+
+
+class TransactionRepository:
+    def __init__(self, db: "sqlalchemy.engine.Engine") -> None:
+        self.db = db
+
+    def get_transaction_by_id(
+        self,
+        transaction_id: int,
+        db_session: "Session | None" = None,
+    ) -> "TransactionModel | None":
+        session = db_session if db_session else Session(self.db)
+
+        transaction = (
+            session.query(TransactionModel)
+            .options(
+                joinedload(
+                    TransactionModel.account,
+                )
+            )
+            .get(transaction_id)
+        )
+
+        if not db_session:
+            session.close()
+
+        return transaction
+
+    def transaction_exists(
+        self,
+        account: "AccountModel",
+        transaction: "TransactionSchema",
+        db_session: "Session | None" = None,
+    ) -> bool:
+        session = db_session if db_session else Session(self.db)
+
+        exists = (
+            session.query(TransactionModel)
+            .filter(
+                TransactionModel.account_id == account.id,
+                TransactionModel.unique_id == transaction.unique_id,
+            )
+            .count()
+            > 0
+        )
+
+        if not db_session:
+            session.close()
+
+        return exists
+
+    def fetch_transaction_by_account(
+        self,
+        account: "AccountModel",
+    ) -> list["TransactionSchema"]:
+        provider_class = get_provider_class(account.provider)
+
+        integration = provider_class(account)
+
+        try:
+            return integration.get_transactions()
+        except Exception as e:  # noqa: BLE001
+            main_logger.exception(
+                {
+                    "msg": "Error fetching transactions",
+                    "account": account,
+                    "provider": account.provider,
+                    "error": e,
+                }
+            )
+            return []
+
+    def fetch_transactions(self) -> list["TransactionModel"]:
+        new_transactions = []
+
+        account_service = get_account_service()
+
+        accounts = account_service.get_accounts(fetch_all=True)
+
+        for account in accounts:
+            account_transactions = self.fetch_transaction_by_account(account)
+
+            with Session(self.db) as session:
+                for transaction in account_transactions:
+                    if self.transaction_exists(
+                        account,
+                        transaction,
+                        db_session=session,
+                    ):
+                        continue
+
+                    optional = {}
+                    if transaction.description:
+                        optional["description"] = transaction.description
+                    if transaction.at_time:
+                        optional["at_time"] = transaction.at_time
+
+                    # Default to UAH
+                    currency_code = 980
+                    if transaction.currency:
+                        currency_code = transaction.currency.numerical_code
+
+                    transaction_model = TransactionModel(
+                        account_id=account.id,
+                        unique_id=transaction.unique_id,
+                        currency=currency_code,
+                        type=transaction.type,
+                        amount=transaction.amount,
+                        **optional,
+                    )
+                    session.add(transaction_model)
+
+                    session.commit()
+
+                    new_transactions.append(transaction_model)
+
+                for tr in new_transactions:
+                    session.refresh(tr)
+
+        main_logger.info(
+            {
+                "msg": "Fetched transactions",
+                "len(new_transactions)": len(new_transactions),
+                "new_transactions": new_transactions,
+            }
+        )
+
+        return new_transactions
