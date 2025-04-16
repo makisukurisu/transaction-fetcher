@@ -62,10 +62,10 @@ class TransactionModel(BaseModel):
 
     @property
     def amount_as_string(self) -> str:
-        transaction_amount = round(self.amount, 2)
-        if transaction_amount > 0:
+        transaction_amount = abs(round(self.amount, 2))
+        if self.type == TransactionType.DEPOSIT:
             transaction_amount = f"+{transaction_amount}"
         else:
-            transaction_amount = str(transaction_amount)
+            transaction_amount = f"-{transaction_amount}"
 
         return transaction_amount
