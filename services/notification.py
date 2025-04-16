@@ -1,5 +1,8 @@
+import datetime
 import time
 from typing import TYPE_CHECKING
+
+from cron_converter import Cron
 
 import db
 from enums.notification_setting import NotificationType
@@ -24,10 +27,31 @@ class NotificationService:
 
     def run(self) -> None:
         while True:
-            notifications = self.fetch_notifications()
-            for notification in notifications:
-                self.process_notification(notification)
-            time.sleep(60)
+            try:
+                main_logger.info("Starting notification service")
+                settings = self.get_notification_settings_for_processing()
+
+                main_logger.info(
+                    {
+                        "msg": "Found notification settings for processing",
+                        "count": len(settings),
+                    }
+                )
+
+                for notification in settings:
+                    self.process_notification(notification)
+                time.sleep(60)
+            except Exception as e:  # noqa: BLE001
+                main_logger.critical(
+                    f"Error in notification service: {e}",
+                    stack_info=True,
+                    exc_info=True,
+                )
+                get_chat_service().notify_management(
+                    text="Error in notification service",
+                    exception=e,
+                )
+                time.sleep(60)
 
     def create_notification(
         self,
@@ -41,11 +65,64 @@ class NotificationService:
 
         main_logger.info(f"Notification created: {notification_setting}")
 
-    def fetch_notifications(self) -> list["NotificationModel"]:
-        return self.notification_repository.fetch_notifications()
+    def get_notification_settings_for_processing(self) -> list["NotificationSettingsModel"]:
+        current_time = datetime.datetime.now(tz=settings.settings.default_timezone)
+        need_processing: list[NotificationSettingsModel] = []
 
-    def process_notification(self, notification: "NotificationModel") -> None:
-        main_logger.info(f"Processing notification: {notification}")
+        notifications = self.notification_repository.get_notification_settings()
+
+        for notification in notifications:
+            cron = Cron()
+            cron.from_string(notification.schedule)
+
+            schedule = cron.schedule(
+                start_date=notification.last_sent_at_dt or datetime.datetime.min,  # noqa: DTZ901
+            )
+            next_call = schedule.next()
+            next_call = next_call.replace(tzinfo=settings.settings.default_timezone)
+
+            if current_time >= next_call:
+                need_processing.append(notification)
+
+        return need_processing
+
+    def _get_message_for_notification(
+        self,
+        notification_setting: "NotificationSettingsModel",
+    ) -> str:
+        if notification_setting.notification_type == NotificationType.BALANCE:
+            from services.transaction import get_transaction_service
+
+            transaction_service = get_transaction_service()
+            balance = transaction_service.get_balance(
+                account_id=notification_setting.account_chat.account_id,
+            )
+
+            if not balance:
+                return "No balance data available"
+
+            return notification_setting.balance_message(
+                balance_data=balance,
+            )
+
+        if notification_setting.notification_type == NotificationType.ACTIVE:
+            return notification_setting.active_message()
+
+        raise NotImplementedError
+
+    def process_notification(self, setting: "NotificationSettingsModel") -> None:
+        main_logger.info(f"Processing notification: {setting}")
+
+        chat_service = get_chat_service()
+
+        chat_service.send_message(
+            chat_id=setting.account_chat.chat_id,
+            text=self._get_message_for_notification(
+                notification_setting=setting,
+            ),
+        )
+
+        self.notification_repository.mark_notification_setting_as_ran(setting=setting)
 
     def notification_exists(self, transaction: "TransactionModel") -> bool:
         return self.notification_repository.notification_exists(

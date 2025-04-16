@@ -835,14 +835,6 @@
 		"withdrawaldate": null
 	},
 	{
-		"entity": "SOUTH GEORGIA AND THE SOUTH SANDWICH ISLANDS",
-		"name": "No universal name",
-		"alpha3": null,
-		"numerical_code": null,
-		"minorunit": null,
-		"withdrawaldate": null
-	},
-	{
 		"entity": "TOKELAU",
 		"name": "New Zealand Dollar",
 		"alpha3": "NZD",
@@ -1876,14 +1868,6 @@
 		"withdrawaldate": null
 	},
 	{
-		"entity": "ANTARCTICA",
-		"name": "No universal name",
-		"alpha3": null,
-		"numerical_code": null,
-		"minorunit": null,
-		"withdrawaldate": null
-	},
-	{
 		"entity": "BOLIVIA (PLURINATIONAL STATE OF)",
 		"name": "Boliviano",
 		"alpha3": "BOB",
@@ -2308,14 +2292,6 @@
 		"withdrawaldate": "1995-03"
 	},
 	{
-		"entity": "ZZ05_UIC-Franc",
-		"name": "UIC-Franc",
-		"alpha3": "XFU",
-		"numerical_code": null,
-		"minorunit": null,
-		"withdrawaldate": "2013-11"
-	},
-	{
 		"entity": "ANDORRA",
 		"name": "Euro",
 		"alpha3": "EUR",
@@ -2642,14 +2618,6 @@
 		"numerical_code": "858",
 		"minorunit": null,
 		"withdrawaldate": "1993-03"
-	},
-	{
-		"entity": "ZZ02_RINET Funds Code",
-		"name": "RINET Funds Code",
-		"alpha3": "XRE",
-		"numerical_code": null,
-		"minorunit": null,
-		"withdrawaldate": "1999-11"
 	},
 	{
 		"entity": "AUSTRALIA",
@@ -3332,14 +3300,6 @@
 		"withdrawaldate": "1987-05"
 	},
 	{
-		"entity": "ZZ01_Gold-Franc",
-		"name": "Gold-Franc",
-		"alpha3": "XFO",
-		"numerical_code": null,
-		"minorunit": null,
-		"withdrawaldate": "2006-10"
-	},
-	{
 		"entity": "CROATIA",
 		"name": "Euro",
 		"alpha3": "EUR",
@@ -3465,14 +3425,6 @@
 		"alpha3": "MXV",
 		"numerical_code": "979",
 		"minorunit": "2",
-		"withdrawaldate": null
-	},
-	{
-		"entity": "PALESTINE, STATE OF",
-		"name": "No universal name",
-		"alpha3": null,
-		"numerical_code": null,
-		"minorunit": null,
 		"withdrawaldate": null
 	},
 	{

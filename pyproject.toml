@@ -5,10 +5,13 @@ description = "A rewrite of cardInfo2 bot"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "alembic[tz]>=1.15.2",
+    "cron-converter>=1.2.1",
     "httpx>=0.28.1",
     "pydantic-settings>=2.8.1",
     "pydantic>=2.11.2",
     "pytelegrambotapi>=4.26.0",
+    "pytz>=2025.2",
     "rsa>=4.9",
     "schedule>=1.2.2",
     "sqlalchemy>=2.0.40",

@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 import db
+from enums.chat import ChatProvider
 from models.chat import ChatModel
 from providers.notification.get import get_chat_provider_class
 from repository import settings
@@ -105,6 +106,30 @@ class ChatService:
         """Deletes an account chat."""
         self.chat_repository.delete_account_chat(
             account_chat_id=account_chat_id,
+        )
+
+    def notify_management(
+        self,
+        text: str,
+        exception: Exception | None = None,
+    ) -> None:
+        """Sends a message to the management chat."""
+
+        if exception:
+            text += f"\n\n{exception=}"
+
+        provider_class = get_chat_provider_class(ChatProvider.TELEGRAM)
+        integration = provider_class(
+            chat=ChatModel(
+                name="Debug Chat",
+                provider=ChatProvider.TELEGRAM,
+                external_id=settings.settings.TELEGRAM_MANAGEMENT_CHAT_ID,
+            ),
+        )
+
+        integration.send_message(
+            text=text,
+            parse_mode="",
         )
 
 

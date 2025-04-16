@@ -6,6 +6,7 @@ from schemas.base import BaseSchema
 
 if TYPE_CHECKING:
     from models.account import AccountModel
+    from schemas.account import BalanceSchema
     from schemas.transaction import TransactionSchema
 
 
@@ -45,4 +46,7 @@ class BaseAccountProvider:
         )
 
     def get_transactions(self) -> list["TransactionSchema"]:
+        raise NotImplementedError("Method not implemented")
+
+    def get_balance(self) -> "BalanceSchema | None":
         raise NotImplementedError("Method not implemented")

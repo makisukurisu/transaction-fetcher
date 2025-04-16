@@ -1,5 +1,7 @@
+import datetime
 import json
 from datetime import timedelta
+from decimal import Decimal
 
 import pydantic
 
@@ -31,3 +33,16 @@ class AccountSchema(BaseSchema):
         if isinstance(value, str):
             value = json.loads(value)
         return value
+
+
+class BalanceSchema(BaseSchema):
+    currency: int | None = None
+
+    start_balance: Decimal = pydantic.Field(
+        default=Decimal(0),
+    )
+    end_balance: Decimal
+    deposited: Decimal | None = None
+    withdrawn: Decimal | None = None
+
+    at_time: datetime.datetime | None = None

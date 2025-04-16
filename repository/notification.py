@@ -1,3 +1,4 @@
+import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import literal
@@ -19,8 +20,38 @@ class NotificationRepository:
     def __init__(self, db: "Engine") -> None:
         self.db = db
 
-    def fetch_notifications(self) -> list["NotificationModel"]:
-        return []
+    def get_notification_settings(self) -> list["NotificationSettingsModel"]:
+        with Session(self.db) as session:
+            q = (
+                session.query(NotificationSettingsModel)
+                .options(
+                    joinedload(
+                        NotificationSettingsModel.account_chat,
+                    ).joinedload(
+                        AccountChatModel.account,
+                    )
+                )
+                .filter(
+                    NotificationSettingsModel.schedule.is_not(None),
+                    NotificationSettingsModel.notification_type.not_in(
+                        [
+                            NotificationType.DEPOSIT,
+                            NotificationType.WITHDRAWAL,
+                        ]
+                    ),
+                )
+            )
+
+            return q.all()
+
+    def mark_notification_setting_as_ran(
+        self,
+        setting: "NotificationSettingsModel",
+    ) -> None:
+        with Session(self.db) as session:
+            setting.last_sent_at = datetime.datetime.now(tz=datetime.UTC).isoformat()
+            session.add(setting)
+            session.commit()
 
     def notification_exists(self, transaction_id: str) -> bool:
         with Session(self.db) as session:

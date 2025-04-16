@@ -25,9 +25,18 @@ class TelegramChatProvider(BaseChatProvider):
             parse_mode=parse_mode,
         )
 
-        message = bot.send_message(
-            chat_id=self._chat.external_id,
-            text=text,
-        )
+        message_id: int | None = None
+        for chunk in telebot.util.smart_split(text):
+            message = telebot.util.antiflood(
+                bot.send_message,
+                chat_id=self._chat.external_id,
+                text=chunk,
+                parse_mode=parse_mode,
+            )
 
-        return str(message.id)
+            message_id = getattr(message, "id", None)
+
+        if message_id is None:
+            raise ValueError("Failed to send message")
+
+        return str(message_id)

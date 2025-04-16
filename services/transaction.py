@@ -9,6 +9,7 @@ from services.notification import get_notification_service
 
 if TYPE_CHECKING:
     from models.transaction import TransactionModel
+    from schemas.account import BalanceSchema
 
 
 class TransactionService:
@@ -20,11 +21,26 @@ class TransactionService:
 
     def run(self) -> None:
         while True:
-            main_logger.info("Fetching transactions...")
-            transactions = self.fetch_transactions()
-            for transaction in transactions:
-                self.process_transaction(transaction)
-            time.sleep(60)
+            try:
+                main_logger.info("Fetching transactions...")
+                transactions = self.fetch_transactions()
+                for transaction in transactions:
+                    self.process_transaction(transaction)
+                time.sleep(60)
+            except Exception as e:  # noqa: BLE001
+                from services.chat import get_chat_service
+
+                main_logger.critical(
+                    f"Error in transaction service: {e}",
+                    stack_info=True,
+                    exc_info=True,
+                )
+
+                get_chat_service().notify_management(
+                    text="Error in transaction service",
+                    exception=e,
+                )
+                time.sleep(60)
 
     def get_transaction_by_id(self, transaction_id: int) -> "TransactionModel | None":
         return self.transaction_repository.get_transaction_by_id(
@@ -44,6 +60,14 @@ class TransactionService:
 
     def process_transaction(self, transaction: "TransactionModel") -> None:
         self.make_notification(transaction)
+
+    def get_balance(
+        self,
+        account_id: int,
+    ) -> "BalanceSchema | None":
+        return self.transaction_repository.get_balance(
+            account_id=account_id,
+        )
 
 
 def get_transaction_service() -> TransactionService:

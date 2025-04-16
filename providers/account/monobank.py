@@ -6,6 +6,8 @@ import pydantic.alias_generators
 
 from enums.transaction import TransactionType
 from providers.account.base import BaseAccountProvider, BaseAccountProviderConfiguration
+from repository import settings
+from schemas.account import BalanceSchema
 from schemas.base import BaseSchema
 from schemas.transaction import TransactionSchema
 from services.currency import get_currency_by_numerical_code
@@ -18,7 +20,47 @@ class MonoBankProviderConfiguration(BaseAccountProviderConfiguration):
     use_to_timestamp: bool = False
 
 
-class MonoBankTransaction(BaseSchema):
+class BaseMonoBankSchema(BaseSchema):
+    model_config = pydantic.ConfigDict(
+        alias_generator=pydantic.AliasGenerator(
+            validation_alias=pydantic.alias_generators.to_camel,
+        )
+    )
+
+
+class MonoBankAccountSchema(BaseMonoBankSchema):
+    id: str
+    balance: int
+    credit_limit: int | None = None
+    currency_code: int
+
+    def to_balance_schema(self) -> "BalanceSchema":
+        return BalanceSchema(
+            end_balance=Decimal(self.balance) / 100,
+            at_time=datetime.datetime.now(tz=datetime.UTC).astimezone(
+                settings.settings.default_timezone,
+            ),
+        )
+
+
+class MonoBankClientInfoSchema(BaseMonoBankSchema):
+    client_id: str
+    name: str
+    accounts: list[MonoBankAccountSchema]
+    jars: list[MonoBankAccountSchema]
+
+    def find_account_by_id(self, account_id: str) -> MonoBankAccountSchema | None:
+        for account in self.accounts:
+            if account.id == account_id:
+                return account
+        for jar in self.jars:
+            if jar.id == account_id:
+                return jar
+
+        return None
+
+
+class MonoBankTransaction(BaseMonoBankSchema):
     id: str
     time: int
     description: str
@@ -56,6 +98,8 @@ class MonoBankTransaction(BaseSchema):
             at_time=datetime.datetime.fromtimestamp(
                 self.time,
                 tz=datetime.UTC,
+            ).astimezone(
+                settings.settings.default_timezone,
             ),
         )
 
@@ -113,3 +157,25 @@ class MonoBankProvider(BaseAccountProvider):
         ]
 
         return [transaction.to_transaction_schema() for transaction in monobank_transactions]
+
+    def get_balance(self) -> "BalanceSchema | None":
+        path = "/personal/client-info"
+
+        response = self.http_client.get(
+            url=path,
+            headers=self.auth_headers,
+        )
+        response.raise_for_status()
+
+        response_data = response.json()
+
+        client_info = MonoBankClientInfoSchema.model_validate(response_data)
+        account = client_info.find_account_by_id(account_id=self.account_id)
+
+        if not account:
+            return None
+
+        balance = account.to_balance_schema()
+        balance.currency = account.currency_code
+
+        return balance

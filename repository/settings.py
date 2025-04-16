@@ -1,5 +1,6 @@
 import pydantic
 import pydantic_settings
+import pytz
 
 
 class Settings(pydantic_settings.BaseSettings):
@@ -14,6 +15,10 @@ class Settings(pydantic_settings.BaseSettings):
     TELEGRAM_BOT_TOKEN: str = pydantic.Field(
         description="Token for the telegram bot. You can get it from @BotFather.",
     )
+
+    @property
+    def default_timezone(self):  # noqa: ANN201
+        return pytz.timezone("Europe/Kyiv")
 
     model_config = pydantic_settings.SettingsConfigDict(
         env_prefix="transaction_fetcher_",

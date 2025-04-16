@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     import sqlalchemy
 
     from models.account import AccountModel
+    from schemas.account import BalanceSchema
     from schemas.transaction import TransactionSchema
 
 
@@ -140,3 +141,23 @@ class TransactionRepository:
         )
 
         return new_transactions
+
+    def get_balance(
+        self,
+        account_id: int,
+    ) -> "BalanceSchema | None":
+        account_service = get_account_service()
+        account = account_service.get_account_by_id(account_id=account_id)
+
+        if not account:
+            return None
+
+        provider_class = get_provider_class(account.provider)
+        integration = provider_class(account)
+
+        balance = integration.get_balance()
+
+        if not balance:
+            return None
+
+        return balance

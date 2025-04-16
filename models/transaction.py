@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from enums.transaction import TransactionType
 from models.base import BaseModel
+from repository import settings
 
 if TYPE_CHECKING:
     from models.account import AccountModel
@@ -55,7 +56,7 @@ class TransactionModel(BaseModel):
         "at_time",
         nullable=False,
         default=lambda: datetime.datetime.now(
-            tz=datetime.UTC,
+            tz=settings.settings.default_timezone,
         ),
     )
 
