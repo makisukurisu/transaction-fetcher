@@ -56,7 +56,7 @@ class NotificationSettingsModel(BaseModel):
 
 Комментарий: {transaction.description}
 
-<b>{transaction.created_at.strftime("%Y-%m-%d | %H:%M")}</b>
+<b>{transaction.at_time.strftime("%Y-%m-%d | %H:%M")}</b>
 """
         return message.strip()
 

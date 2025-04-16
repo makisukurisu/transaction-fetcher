@@ -3,6 +3,7 @@ from decimal import Decimal
 
 import pydantic
 import pydantic.alias_generators
+import pytz
 
 from enums.transaction import TransactionType
 from providers.account.base import BaseAccountProvider, BaseAccountProviderConfiguration
@@ -11,6 +12,8 @@ from schemas.account import BalanceSchema
 from schemas.base import BaseSchema
 from schemas.transaction import TransactionSchema
 from services.currency import get_currency_by_numerical_code
+
+monobank_timezone = pytz.timezone("UTC")
 
 
 class MonoBankProviderConfiguration(BaseAccountProviderConfiguration):
@@ -37,9 +40,7 @@ class MonoBankAccountSchema(BaseMonoBankSchema):
     def to_balance_schema(self) -> "BalanceSchema":
         return BalanceSchema(
             end_balance=Decimal(self.balance) / 100,
-            at_time=datetime.datetime.now(tz=datetime.UTC).astimezone(
-                settings.settings.default_timezone,
-            ),
+            at_time=datetime.datetime.now(tz=settings.settings.default_timezone),
         )
 
 
@@ -97,7 +98,7 @@ class MonoBankTransaction(BaseMonoBankSchema):
             description=self.comment or self.description,
             at_time=datetime.datetime.fromtimestamp(
                 self.time,
-                tz=datetime.UTC,
+                tz=monobank_timezone,
             ).astimezone(
                 settings.settings.default_timezone,
             ),

@@ -9,6 +9,7 @@ import pydantic
 import pytz
 import rsa
 
+from enums.transaction import TransactionType
 from logger import main_logger
 from providers.account.base import BaseAccountProvider, BaseAccountProviderConfiguration
 from schemas.account import BalanceSchema
@@ -70,7 +71,12 @@ class ABankTransaction(BaseSchema):
             unique_id=str(self.payment_id),
             at_time=self.date_change.astimezone(abank_timezone),
             description=self.description,
-            amount=-self.amount if self.credit.iban != own_iban else self.amount,
+            amount=self.amount,
+            type=(
+                TransactionType.DEPOSIT
+                if self.credit.iban == own_iban
+                else TransactionType.WITHDRAWAL
+            ),
             currency_code=self.currency,
         )
 

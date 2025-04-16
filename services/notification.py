@@ -150,6 +150,7 @@ class NotificationService:
 
         notification_settings = self.notification_repository.get_settings(
             notification_type=notification_type,
+            account_id=transaction.account_id,
         )
 
         chat_service = get_chat_service()

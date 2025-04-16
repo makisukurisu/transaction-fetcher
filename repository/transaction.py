@@ -127,10 +127,9 @@ class TransactionRepository:
 
                     session.commit()
 
-                    new_transactions.append(transaction_model)
-
-                for tr in new_transactions:
-                    session.refresh(tr)
+                    new_transactions.append(
+                        session.get(TransactionModel, transaction_model.id),
+                    )
 
         main_logger.info(
             {
