@@ -2,21 +2,18 @@ import base64
 import datetime
 import json
 from decimal import Decimal
-from typing import TYPE_CHECKING
 from uuid import uuid4
 
+import httpx
 import pydantic
 import pytz
 import rsa
 
+from logger import main_logger
 from providers.account.base import BaseAccountProvider, BaseAccountProviderConfiguration
 from schemas.account import BalanceSchema
 from schemas.base import BaseSchema
 from schemas.transaction import TransactionSchema
-
-if TYPE_CHECKING:
-    import httpx
-
 
 abank_timezone = pytz.timezone("Europe/Kyiv")
 
@@ -144,8 +141,8 @@ class ABankProvider(BaseAccountProvider):
         return self.http_client.request(
             method=method,
             url=endpoint,
-            data=body_bytes,
-            headers=self._headers(),
+            content=body_bytes,
+            headers=headers,
         )
 
     def get_transactions(self) -> list["TransactionSchema"]:
@@ -167,7 +164,17 @@ class ABankProvider(BaseAccountProvider):
             body=request_data,
         )
 
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            main_logger.error(
+                {
+                    "msg": "Failed to get transactions",
+                    "status_code": response.status_code,
+                    "response": response.content,
+                }
+            )
+            raise e
 
         response_data = ABankTransactionsResponseSchema.model_validate(response.json())
 
