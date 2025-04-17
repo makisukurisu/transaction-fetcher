@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 from logger import main_logger
 from models.transaction import TransactionModel
 from providers.account.get import get_provider_class
+from schemas.transaction import DBTransactionSchema
 from services.account import get_account_service
 
 if TYPE_CHECKING:
@@ -85,7 +86,7 @@ class TransactionRepository:
             )
             return []
 
-    def fetch_transactions(self) -> list["TransactionModel"]:
+    def fetch_transactions(self) -> list["DBTransactionSchema"]:
         new_transactions = []
 
         account_service = get_account_service()
@@ -127,9 +128,9 @@ class TransactionRepository:
 
                     session.commit()
 
-                    new_transactions.append(
-                        session.get(TransactionModel, transaction_model.id),
-                    )
+                    session.refresh(transaction_model)
+
+                    new_transactions.append(DBTransactionSchema.model_validate(transaction_model))
 
         main_logger.info(
             {

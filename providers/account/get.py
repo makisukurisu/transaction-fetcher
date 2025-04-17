@@ -2,6 +2,7 @@ from enums.account import AccountProvider
 from providers.account.abank import ABankProvider
 from providers.account.base import BaseAccountProvider
 from providers.account.monobank import MonoBankProvider
+from providers.account.privatbank_fop import PrivatBankFOPProvider
 
 
 def get_provider_class(
@@ -10,4 +11,5 @@ def get_provider_class(
     return {
         AccountProvider.MONOBANK: MonoBankProvider,
         AccountProvider.ABANK: ABankProvider,
+        AccountProvider.PRIVATBANK_FOP: PrivatBankFOPProvider,
     }[provider_name]

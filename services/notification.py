@@ -9,13 +9,13 @@ from enums.notification_setting import NotificationType
 from logger import main_logger
 from repository import settings
 from repository.notification import NotificationRepository
-from schemas.notification import CreateNotificationSchema
+from schemas.notification import CreateNotificationSchema, NotificationSettingsSchema
 from services.chat import get_chat_service
 
 if TYPE_CHECKING:
     from models.notification import NotificationModel
     from models.notification_setting import NotificationSettingsModel
-    from models.transaction import TransactionModel
+    from schemas.transaction import DBTransactionSchema
 
 
 class NotificationService:
@@ -65,11 +65,11 @@ class NotificationService:
 
         main_logger.info(f"Notification created: {notification_setting}")
 
-    def get_notification_settings_for_processing(self) -> list["NotificationSettingsModel"]:
+    def get_notification_settings_for_processing(self) -> list["NotificationSettingsSchema"]:
         current_time = datetime.datetime.now(tz=settings.settings.default_timezone)
-        need_processing: list[NotificationSettingsModel] = []
+        need_processing: list[NotificationSettingsSchema] = []
 
-        notifications = self.notification_repository.get_notification_settings()
+        notifications = self.notification_repository.get_notification_settings_schemas()
 
         for notification in notifications:
             cron = Cron()
@@ -79,7 +79,10 @@ class NotificationService:
                 start_date=notification.last_sent_at_dt or datetime.datetime.min,  # noqa: DTZ901
             )
             next_call = schedule.next()
-            next_call = next_call.replace(tzinfo=settings.settings.default_timezone)
+            if next_call.tzinfo is None:
+                next_call = next_call.replace(
+                    tzinfo=datetime.UTC,
+                )
 
             if current_time >= next_call:
                 need_processing.append(notification)
@@ -88,7 +91,7 @@ class NotificationService:
 
     def _get_message_for_notification(
         self,
-        notification_setting: "NotificationSettingsModel",
+        notification_setting: "NotificationSettingsSchema",
     ) -> str:
         if notification_setting.notification_type == NotificationType.BALANCE:
             from services.transaction import get_transaction_service
@@ -110,7 +113,7 @@ class NotificationService:
 
         raise NotImplementedError
 
-    def process_notification(self, setting: "NotificationSettingsModel") -> None:
+    def process_notification(self, setting: "NotificationSettingsSchema") -> None:
         main_logger.info(f"Processing notification: {setting}")
 
         chat_service = get_chat_service()
@@ -124,7 +127,7 @@ class NotificationService:
 
         self.notification_repository.mark_notification_setting_as_ran(setting=setting)
 
-    def notification_exists(self, transaction: "TransactionModel") -> bool:
+    def notification_exists(self, transaction: "DBTransactionSchema") -> bool:
         return self.notification_repository.notification_exists(
             transaction_id=transaction.id,
         )
@@ -144,7 +147,7 @@ class NotificationService:
 
     def make_transaction_notifications(
         self,
-        transaction: "TransactionModel",
+        transaction: "DBTransactionSchema",
     ) -> None:
         notification_type = NotificationType.from_transaction(transaction)
 

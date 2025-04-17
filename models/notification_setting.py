@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from enums.notification_setting import NotificationType
 from models.base import BaseModel
 from repository import settings
+from schemas.transaction import DBTransactionSchema
 from services.currency import get_currency_by_numerical_code
 
 if TYPE_CHECKING:
@@ -45,7 +46,7 @@ class NotificationSettingsModel(BaseModel):
 
     def transaction_message(
         self,
-        transaction: "TransactionModel",
+        transaction: "DBTransactionSchema",
     ) -> str:
         currency = get_currency_by_numerical_code(
             numerical_code=transaction.currency,

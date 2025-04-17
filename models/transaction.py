@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from enums.transaction import TransactionType
 from models.base import BaseModel
 from repository import settings
+from utils import amount_with_sign_and_space
 
 if TYPE_CHECKING:
     from models.account import AccountModel
@@ -63,9 +64,7 @@ class TransactionModel(BaseModel):
     @property
     def amount_as_string(self) -> str:
         transaction_amount = abs(round(self.amount, 2))
-        if self.type == TransactionType.DEPOSIT:
-            transaction_amount = f"+{transaction_amount}"
-        else:
-            transaction_amount = f"-{transaction_amount}"
+        if self.type == TransactionType.WITHDRAWAL:
+            transaction_amount = -transaction_amount
 
-        return transaction_amount
+        return amount_with_sign_and_space(transaction_amount)

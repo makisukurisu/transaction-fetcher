@@ -8,12 +8,12 @@ from enums.notification_setting import NotificationType
 from models.account_chat_model import AccountChatModel
 from models.notification import NotificationModel
 from models.notification_setting import NotificationSettingsModel
-from schemas.notification import CreateNotificationSchema
+from schemas.notification import CreateNotificationSchema, NotificationSettingsSchema
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
-    from models.transaction import TransactionModel
+    from schemas.transaction import DBTransactionSchema
 
 
 class NotificationRepository:
@@ -29,7 +29,7 @@ class NotificationRepository:
                         NotificationSettingsModel.account_chat,
                     ).joinedload(
                         AccountChatModel.account,
-                    )
+                    ),
                 )
                 .filter(
                     NotificationSettingsModel.schedule.is_not(None),
@@ -44,16 +44,46 @@ class NotificationRepository:
 
             return q.all()
 
+    def get_notification_settings_schemas(
+        self,
+    ) -> list["NotificationSettingsSchema"]:
+        with Session(self.db) as session:
+            q = (
+                session.query(NotificationSettingsModel)
+                .options(
+                    joinedload(
+                        NotificationSettingsModel.account_chat,
+                    ).joinedload(
+                        AccountChatModel.account,
+                    ),
+                )
+                .filter(
+                    NotificationSettingsModel.schedule.is_not(None),
+                    NotificationSettingsModel.notification_type.not_in(
+                        [
+                            NotificationType.DEPOSIT,
+                            NotificationType.WITHDRAWAL,
+                        ]
+                    ),
+                )
+            )
+
+            return [NotificationSettingsSchema.model_validate(entity) for entity in q.all()]
+
     def mark_notification_setting_as_ran(
         self,
-        setting: "NotificationSettingsModel",
+        setting: "NotificationSettingsSchema",
     ) -> None:
         with Session(self.db) as session:
-            setting.last_sent_at = datetime.datetime.now(tz=datetime.UTC).isoformat()
-            session.add(setting)
+            q = session.query(NotificationSettingsModel).filter(
+                NotificationSettingsModel.id == setting.id,
+            )
+            entity = q.first()
+            entity.last_sent_at = datetime.datetime.now(tz=datetime.UTC).isoformat()
+            session.add(entity)
             session.commit()
 
-    def notification_exists(self, transaction_id: str) -> bool:
+    def notification_exists(self, transaction_id: int) -> bool:
         with Session(self.db) as session:
             q = session.query(NotificationModel).filter(
                 NotificationModel.transaction_id == transaction_id,
@@ -106,7 +136,7 @@ class NotificationRepository:
 
     def create_transaction_notification(
         self,
-        transaction: "TransactionModel",
+        transaction: "DBTransactionSchema",
         notification_setting: "NotificationSettingsModel",
         external_chat_id: str,
         external_message_id: str,

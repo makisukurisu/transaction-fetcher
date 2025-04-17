@@ -7,6 +7,7 @@ import pydantic
 
 from enums.account import AccountProvider
 from schemas.base import BaseSchema
+from schemas.chat import ChatSchema
 
 
 class CreateAccountSchema(BaseSchema):
@@ -46,3 +47,13 @@ class BalanceSchema(BaseSchema):
     withdrawn: Decimal | None = None
 
     at_time: datetime.datetime | None = None
+
+
+class AccountChatSchema(BaseSchema):
+    id: int
+
+    account_id: int
+    chat_id: int
+
+    account: AccountSchema
+    chat: ChatSchema

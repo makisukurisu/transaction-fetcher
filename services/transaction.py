@@ -10,6 +10,7 @@ from services.notification import get_notification_service
 if TYPE_CHECKING:
     from models.transaction import TransactionModel
     from schemas.account import BalanceSchema
+    from schemas.transaction import DBTransactionSchema
 
 
 class TransactionService:
@@ -47,10 +48,10 @@ class TransactionService:
             transaction_id=transaction_id,
         )
 
-    def fetch_transactions(self) -> list:
+    def fetch_transactions(self) -> list["DBTransactionSchema"]:
         return self.transaction_repository.fetch_transactions()
 
-    def make_notification(self, transaction: "TransactionModel") -> None:
+    def make_notification(self, transaction: "DBTransactionSchema") -> None:
         notification_service = get_notification_service()
 
         if notification_service.notification_exists(transaction):
@@ -58,7 +59,7 @@ class TransactionService:
 
         notification_service.make_transaction_notifications(transaction)
 
-    def process_transaction(self, transaction: "TransactionModel") -> None:
+    def process_transaction(self, transaction: "DBTransactionSchema") -> None:
         self.make_notification(transaction)
 
     def get_balance(
