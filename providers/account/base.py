@@ -50,3 +50,6 @@ class BaseAccountProvider:
 
     def get_balance(self) -> "BalanceSchema | None":
         raise NotImplementedError("Method not implemented")
+
+    def update_account_data(self) -> dict | None:
+        return None

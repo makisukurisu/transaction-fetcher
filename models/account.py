@@ -1,3 +1,4 @@
+from datetime import timedelta
 from sqlalchemy import Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -45,3 +46,10 @@ class AccountModel(BaseModel):
     transactions: Mapped[list[TransactionModel]] = relationship(
         back_populates="account",
     )
+
+    @property
+    def interval(self) -> timedelta:
+        """
+        Convert the interval in seconds to a timedelta object.
+        """
+        return timedelta(seconds=self.interval_seconds)

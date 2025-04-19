@@ -77,7 +77,7 @@ class AccountRepository:
     def update(
         self,
         account_id: int,
-        account_data: CreateAccountSchema,
+        account_data: AccountModel | CreateAccountSchema,
     ) -> AccountModel:
         with Session(self.db) as session:
             account = session.query(AccountModel).filter_by(id=account_id).first()
@@ -86,13 +86,20 @@ class AccountRepository:
 
             account.name = account_data.name
             account.provider = account_data.provider
-            account.configuration_parameters = json.dumps(
-                account_data.configuration_parameters,
-                indent=4,
-            )
+
+            if isinstance(account_data.configuration_parameters, dict):
+                account.configuration_parameters = json.dumps(
+                    account_data.configuration_parameters,
+                    indent=4,
+                )
+            else:
+                account.configuration_parameters = account_data.configuration_parameters
+
             account.interval_seconds = account_data.interval.total_seconds()
+
             session.commit()
             session.refresh(account)
+
             return account
 
     def delete(self, account_id: int) -> bool:

@@ -9,4 +9,4 @@ def amount_with_spaces(amount: Decimal) -> str:
 def amount_with_sign_and_space(amount: Decimal) -> str:
     """Format a decimal number with a sign and space as thousands separators."""
     sign = "+" if amount >= 0 else "-"
-    return f"{sign} {abs(amount_with_spaces(amount))}"
+    return f"{sign} {amount_with_spaces(abs(amount))}"
