@@ -22,6 +22,7 @@ class Settings(pydantic_settings.BaseSettings):
 
     model_config = pydantic_settings.SettingsConfigDict(
         env_prefix="transaction_fetcher_",
+        env_file=".env",
     )
 
 
