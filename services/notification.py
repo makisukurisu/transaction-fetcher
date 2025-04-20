@@ -75,17 +75,12 @@ class NotificationService:
             cron = Cron()
             cron.from_string(notification.schedule)
 
+            start_date = datetime.datetime(2000, 1, 1, 0, 0, 0, tzinfo=datetime.UTC)
+            if notification.last_sent_at:
+                start_date = notification.last_sent_at_dt.astimezone(datetime.UTC)
+
             schedule = cron.schedule(
-                start_date=notification.last_sent_at_dt
-                or datetime.datetime(
-                    2000,
-                    1,
-                    1,
-                    0,
-                    0,
-                    0,
-                    tzinfo=datetime.UTC,
-                ),
+                start_date=start_date,
             )
             next_call = schedule.next()
 
