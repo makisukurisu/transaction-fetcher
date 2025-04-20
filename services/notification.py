@@ -75,9 +75,13 @@ class NotificationService:
             cron = Cron()
             cron.from_string(notification.schedule)
 
-            start_date = datetime.datetime(2000, 1, 1, 0, 0, 0, tzinfo=datetime.UTC)
+            start_date = datetime.datetime(
+                2000, 1, 1, 0, 0, 0, tzinfo=settings.settings.default_timezone
+            )
             if notification.last_sent_at:
-                start_date = notification.last_sent_at_dt.astimezone(datetime.UTC)
+                start_date = notification.last_sent_at_dt.astimezone(
+                    settings.settings.default_timezone
+                )
 
             main_logger.info(
                 {
@@ -88,7 +92,6 @@ class NotificationService:
 
             schedule = cron.schedule(
                 start_date=start_date,
-                timezone_str=settings.settings.default_timezone.tzname(None),
             )
             next_call = schedule.next()
 
