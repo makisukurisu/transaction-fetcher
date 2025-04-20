@@ -88,6 +88,7 @@ class NotificationService:
 
             schedule = cron.schedule(
                 start_date=start_date,
+                timezone_str=settings.settings.default_timezone.tzname(None),
             )
             next_call = schedule.next()
 
