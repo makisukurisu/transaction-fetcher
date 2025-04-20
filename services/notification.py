@@ -84,6 +84,15 @@ class NotificationService:
             )
             next_call = schedule.next()
 
+            main_logger.info(
+                {
+                    "msg": "Next call for notification",
+                    "notification": notification,
+                    "next_call": next_call,
+                    "current_time": current_time,
+                }
+            )
+
             # Since we receive naive (or UTC) datetime from cron, we need to convert it
             # to the local timezone
             try:
@@ -102,10 +111,19 @@ class NotificationService:
                 )
                 continue
 
+            main_logger.info(
+                {
+                    "msg": "Localized next call",
+                    "notification": notification,
+                    "next_call": next_call,
+                    "current_time": current_time,
+                }
+            )
+
             if current_time >= next_call:
                 need_processing.append(notification)
             else:
-                main_logger.debug(
+                main_logger.info(
                     {
                         "msg": "Skipping notification",
                         "notification": notification,
