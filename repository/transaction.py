@@ -76,6 +76,8 @@ class TransactionRepository:
         try:
             return integration.get_transactions()
         except Exception as e:  # noqa: BLE001
+            from services.chat import get_chat_service
+
             main_logger.exception(
                 {
                     "msg": "Error fetching transactions",
@@ -84,6 +86,12 @@ class TransactionRepository:
                     "error": e,
                 }
             )
+
+            get_chat_service().notify_management(
+                text=f"Could not fetch transactions for: {account.id=}",
+                exception=e,
+            )
+
             return []
 
     def fetch_transactions(self) -> list["DBTransactionSchema"]:

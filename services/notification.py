@@ -83,9 +83,33 @@ class NotificationService:
                 next_call = next_call.replace(
                     tzinfo=datetime.UTC,
                 )
+            else:
+                try:
+                    next_call = next_call.astimezone(
+                        settings.settings.default_timezone,
+                    )
+                except Exception as e:  # noqa: BLE001
+                    main_logger.exception(
+                        {
+                            "msg": "Error converting timezone",
+                            "notification": notification,
+                            "error": e,
+                        },
+                        exc_info=True,
+                    )
+                    continue
 
             if current_time >= next_call:
                 need_processing.append(notification)
+            else:
+                main_logger.debug(
+                    {
+                        "msg": "Skipping notification",
+                        "notification": notification,
+                        "next_call": next_call,
+                        "current_time": current_time,
+                    }
+                )
 
         return need_processing
 
