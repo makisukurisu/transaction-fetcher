@@ -79,25 +79,24 @@ class NotificationService:
                 start_date=notification.last_sent_at_dt or datetime.datetime.min,  # noqa: DTZ901
             )
             next_call = schedule.next()
-            if next_call.tzinfo is None:
+
+            # Since we receive naive (or UTC) datetime from cron, we need to convert it
+            # to the local timezone
+            try:
                 next_call = next_call.replace(
-                    tzinfo=datetime.UTC,
+                    tzinfo=None,
                 )
-            else:
-                try:
-                    next_call = next_call.astimezone(
-                        settings.settings.default_timezone,
-                    )
-                except Exception as e:  # noqa: BLE001
-                    main_logger.exception(
-                        {
-                            "msg": "Error converting timezone",
-                            "notification": notification,
-                            "error": e,
-                        },
-                        exc_info=True,
-                    )
-                    continue
+                next_call = settings.settings.default_timezone.localize(next_call)
+            except Exception as e:  # noqa: BLE001
+                main_logger.exception(
+                    {
+                        "msg": "Error converting timezone",
+                        "notification": notification,
+                        "error": e,
+                    },
+                    exc_info=True,
+                )
+                continue
 
             if current_time >= next_call:
                 need_processing.append(notification)
