@@ -76,7 +76,16 @@ class NotificationService:
             cron.from_string(notification.schedule)
 
             schedule = cron.schedule(
-                start_date=notification.last_sent_at_dt or datetime.datetime.min,  # noqa: DTZ901
+                start_date=notification.last_sent_at_dt
+                or datetime.datetime(
+                    2000,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    tzinfo=datetime.UTC,
+                ),
             )
             next_call = schedule.next()
 
