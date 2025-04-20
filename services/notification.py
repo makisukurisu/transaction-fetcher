@@ -79,6 +79,13 @@ class NotificationService:
             if notification.last_sent_at:
                 start_date = notification.last_sent_at_dt.astimezone(datetime.UTC)
 
+            main_logger.info(
+                {
+                    "msg": "Start Date",
+                    "start_date": start_date,
+                }
+            )
+
             schedule = cron.schedule(
                 start_date=start_date,
             )
@@ -87,7 +94,6 @@ class NotificationService:
             main_logger.info(
                 {
                     "msg": "Next call for notification",
-                    "notification": notification,
                     "next_call": next_call,
                     "current_time": current_time,
                 }
