@@ -30,9 +30,9 @@ class PrivatBankTransactionType(StrEnum):
     @property
     def as_transaction_type(self) -> TransactionType:
         if self == PrivatBankTransactionType.DEBIT:
-            return TransactionType.DEPOSIT
-        if self == PrivatBankTransactionType.CREDIT:
             return TransactionType.WITHDRAWAL
+        if self == PrivatBankTransactionType.CREDIT:
+            return TransactionType.DEPOSIT
         raise ValueError(f"Unknown transaction type: {self}")
 
 
