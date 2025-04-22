@@ -7,13 +7,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from enums.notification_setting import NotificationType
 from models.base import BaseModel
 from repository import settings
-from schemas.transaction import DBTransactionSchema
 from services.currency import get_currency_by_numerical_code
 
 if TYPE_CHECKING:
     from models.account_chat_model import AccountChatModel
-    from models.transaction import TransactionModel
     from schemas.account import BalanceSchema
+    from schemas.transaction import DBTransactionSchema
 
 
 class NotificationSettingsModel(BaseModel):
@@ -53,7 +52,8 @@ class NotificationSettingsModel(BaseModel):
         )
 
         message = f"""
-{self.account_chat.account.name}: <b>{transaction.amount_as_string} {currency.alpha3}</b>
+{self.account_chat.account.name}:
+<b>{transaction.amount_as_string} {currency.alpha3}</b>
 
 Комментарий: {transaction.description}
 

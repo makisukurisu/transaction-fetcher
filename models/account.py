@@ -1,4 +1,5 @@
 from datetime import timedelta
+
 from sqlalchemy import Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
