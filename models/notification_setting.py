@@ -55,7 +55,7 @@ class NotificationSettingsModel(BaseModel):
 {self.account_chat.account.name}:
 <b>{transaction.amount_as_string} {currency.alpha3}</b>
 
-Комментарий: {transaction.description}
+{transaction.description}
 
 <b>{transaction.at_time.strftime("%Y-%m-%d | %H:%M")}</b>
 """
