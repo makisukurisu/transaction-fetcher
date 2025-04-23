@@ -50,6 +50,25 @@ class PrivatBankTransaction(BaseSchema):
     )
 
     @pydantic.field_validator(
+        "description",
+        mode="after",
+    )
+    @classmethod
+    def convert_description(cls, value: str) -> str:
+        import re
+
+        # As per request
+        matches = re.search(
+            r"(,\sквитанція\s(?:[\x00-\x7F]*\b))",
+            value,
+            re.IGNORECASE,
+        )
+        if matches:
+            return value.replace(matches.group(1), "")
+
+        return value
+
+    @pydantic.field_validator(
         "processed_at",
         mode="before",
     )
