@@ -121,8 +121,8 @@ class PrivatBankBalance(BaseSchema):
             currency=currency.numerical_code,
             start_balance=self.balance_start,
             end_balance=self.balance_end,
-            deposited=self.turnover_debit,
-            withdrawn=self.turnover_credit,
+            deposited=self.turnover_credit,
+            withdrawn=self.turnover_debit,
             at_time=datetime.datetime.now(
                 tz=settings.settings.default_timezone,
             ),
