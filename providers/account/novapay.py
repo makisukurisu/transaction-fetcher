@@ -195,6 +195,6 @@ class NovaPayProvider(BaseAccountProvider):
             currency=980,
             start_balance=Decimal(data.find("InCome").text),
             end_balance=Decimal(data.find("OutCome").text),
-            deposited=Decimal(data.find("CreditedAmount").text),
-            withdrawn=Decimal(data.find("DebitedAmount").text),
+            deposited=Decimal(data.find("CreditAmount").text),
+            withdrawn=Decimal(data.find("DebitAmount").text),
         )
