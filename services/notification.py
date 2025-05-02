@@ -193,7 +193,7 @@ class NotificationService:
                     UnansweredNotificationSchema(
                         account_name=transaction.account.name,
                         amount=transaction.amount_as_string,
-                        at_time=transaction.at_time,
+                        at_time=transaction.at_time.strftime("%d.%m %H:%M"),
                         message_link=f"<a href='https://t.me/c/{notification.external_chat_id.replace('-100', '')}/{notification.external_message_id}'>{'{msg}'}</a>",  # noqa: E501
                     )
                 )
