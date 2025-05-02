@@ -954,11 +954,11 @@ def unanswered(message: telebot.types.Message) -> None:
             )
         )
 
-    message = NotificationSettingsModel.unanswered_message(
+    text = NotificationSettingsModel.unanswered_message(
         notifications=items,
     )
 
-    for chunk in telebot.util.smart_split(message):
+    for chunk in telebot.util.smart_split(text):
         telebot.util.antiflood(
             bot.reply_to,
             message=message,
