@@ -163,7 +163,17 @@ class TransactionRepository:
         provider_class = get_provider_class(account.provider)
         integration = provider_class(account)
 
-        balance = integration.get_balance()
+        try:
+            balance = integration.get_balance()
+        except NotImplementedError:
+            main_logger.warning(
+                {
+                    "msg": "Balance fetching not implemented",
+                    "account": account,
+                    "provider": account.provider,
+                }
+            )
+            return None
 
         if not balance:
             return None
