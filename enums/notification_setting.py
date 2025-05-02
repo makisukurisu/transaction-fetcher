@@ -12,6 +12,7 @@ class NotificationType(StrEnum):
     ACTIVE = "ACTIVE"
     DEPOSIT = "DEPOSIT"
     WITHDRAWAL = "WITHDRAWAL"
+    UNANSWERED = "UNANSWERED"
 
     @classmethod
     def from_transaction(

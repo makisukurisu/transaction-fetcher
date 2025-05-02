@@ -12,6 +12,7 @@ from services.currency import get_currency_by_numerical_code
 if TYPE_CHECKING:
     from models.account_chat_model import AccountChatModel
     from schemas.account import BalanceSchema
+    from schemas.notification import UnansweredNotificationSchema
     from schemas.transaction import DBTransactionSchema
 
 
@@ -119,3 +120,22 @@ class NotificationSettingsModel(BaseModel):
 
     def set_last_sent_at(self, dt: datetime.datetime) -> None:
         self.last_sent_at = dt.isoformat()
+
+    @classmethod
+    def unanswered_message(
+        cls,
+        notifications: list["UnansweredNotificationSchema"],
+    ) -> str:
+        message = "Не отвеченные сообщения:\n\n"  # noqa: RUF001
+
+        unanswered = []
+        for notification in notifications:
+            tmp = f"{notification.account_name}: {notification.amount} | {notification.at_time}"
+            unanswered.append(
+                notification.message_link.format(
+                    msg=tmp,
+                )
+            )
+
+        message += "\n".join(unanswered)
+        return message.strip()

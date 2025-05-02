@@ -7,7 +7,7 @@ from models.notification_setting import NotificationSettingsModel
 from repository import settings
 from schemas.account import AccountSchema, CreateAccountSchema
 from schemas.chat import ChatSchema, CreateChatSchema
-from schemas.notification import CreateNotificationSchema
+from schemas.notification import CreateNotificationSchema, UnansweredNotificationSchema
 from services.account import get_account_service
 from services.chat import get_chat_service
 from services.notification import get_notification_service
@@ -935,24 +935,35 @@ def unanswered(message: telebot.types.Message) -> None:
         external_chat_id=message.chat.id,
     )
 
-    unanswered_list: list[str] = []
+    items = []
 
     for notification in notifications:
         transaction = transaction_service.get_transaction_by_id(
             transaction_id=notification.transaction_id,
         )
 
-        external_chat_id = notification.external_chat_id.replace("-100", "")
+        if not transaction:
+            continue
 
-        msg = f"{transaction.account.name}: {transaction.amount_as_string} | {transaction.at_time.strftime('%Y-%m-%d %H:%M')}"  # noqa: E501
-        msg = f'<a href="https://t.me/c/{external_chat_id}/{notification.external_message_id}">{msg}</a>'
+        items.append(
+            UnansweredNotificationSchema(
+                account_name=transaction.account.name,
+                amount_as_string=transaction.amount_as_string,
+                at_time=transaction.at_time,
+                message_link=f"<a href='https://t.me/c/{notification.external_chat_id.replace('-100', '')}/{notification.external_message_id}'>{'{msg}'}</a>",  # noqa: E501
+            )
+        )
 
-        unanswered_list.append(msg)
-
-    bot.reply_to(
-        message=message,
-        text="Не отвеченные сообщения:\n\n" + "\n".join(unanswered_list),  # noqa: RUF001
+    message = NotificationSettingsModel.unanswered_message(
+        notifications=items,
     )
+
+    for chunk in telebot.util.smart_split(message):
+        telebot.util.antiflood(
+            bot.reply_to,
+            message=message,
+            text=chunk,
+        )
 
 
 @bot.message_handler(commands=["balances"])

@@ -9,7 +9,11 @@ from enums.notification_setting import NotificationType
 from logger import main_logger
 from repository import settings
 from repository.notification import NotificationRepository
-from schemas.notification import CreateNotificationSchema, NotificationSettingsSchema
+from schemas.notification import (
+    CreateNotificationSchema,
+    NotificationSettingsSchema,
+    UnansweredNotificationSchema,
+)
 from services.chat import get_chat_service
 
 if TYPE_CHECKING:
@@ -165,6 +169,38 @@ class NotificationService:
 
         if notification_setting.notification_type == NotificationType.ACTIVE:
             return notification_setting.active_message()
+
+        if notification_setting.notification_type == NotificationType.UNANSWERED:
+            from services.transaction import get_transaction_service
+
+            transaction_service = get_transaction_service()
+
+            unanswered = self.unanswered_notifications(
+                external_chat_id=notification_setting.account_chat.chat_id,
+            )
+
+            items = []
+
+            for notification in unanswered:
+                transaction = transaction_service.get_transaction_by_id(
+                    transaction_id=notification.transaction_id,
+                )
+
+                if not transaction:
+                    continue
+
+                items.append(
+                    UnansweredNotificationSchema(
+                        account_name=transaction.account.name,
+                        amount_as_string=transaction.amount_as_string,
+                        at_time=transaction.at_time,
+                        message_link=f"<a href='https://t.me/c/{notification.external_chat_id.replace('-100', '')}/{notification.external_message_id}'>{'{msg}'}</a>",  # noqa: E501
+                    )
+                )
+
+            return notification_setting.unanswered_message(
+                notifications=items,
+            )
 
         raise NotImplementedError
 
