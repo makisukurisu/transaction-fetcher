@@ -176,7 +176,7 @@ class NotificationService:
             transaction_service = get_transaction_service()
 
             unanswered = self.unanswered_notifications(
-                external_chat_id=notification_setting.account_chat.chat_id,
+                external_chat_id=notification_setting.account_chat.chat.external_id,
             )
 
             items = []
