@@ -61,9 +61,11 @@ class NotificationSettingsModel(BaseModel):
 """
         return message.strip()
 
-    def balance_message(
-        self,
+    @classmethod
+    def balance_message_base(
+        cls,
         balance_data: "BalanceSchema",
+        account_name: str,
     ) -> str:
         at_time = balance_data.at_time or datetime.datetime.now(
             tz=settings.settings.default_timezone,
@@ -81,7 +83,7 @@ class NotificationSettingsModel(BaseModel):
 """
 
         message = f"""
-{self.account_chat.account.name}
+{account_name}
 
 Начало дня: <b>{balance_data.start_balance} {currency.alpha3}</b>
 Конец дня: <b>{balance_data.end_balance} {currency.alpha3}</b>
@@ -91,6 +93,15 @@ class NotificationSettingsModel(BaseModel):
 """
 
         return message.strip()
+
+    def balance_message(
+        self,
+        balance_data: "BalanceSchema",
+    ) -> str:
+        return self.balance_message_base(
+            balance_data=balance_data,
+            account_name=self.account_chat.account.name,
+        )
 
     def active_message(
         self,

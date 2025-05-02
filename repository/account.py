@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy.orm import Session
 
 from models.account import AccountModel
+from models.account_chat_model import AccountChatModel
 from schemas.account import CreateAccountSchema
 
 if TYPE_CHECKING:
@@ -111,3 +112,28 @@ class AccountRepository:
             session.delete(account)
             session.commit()
             return True
+
+    def get_all_accounts_for_chat(
+        self,
+        chat_id: int,
+    ) -> list[AccountModel]:
+        with Session(self.db) as session:
+            account_chats = (
+                session.query(AccountChatModel)
+                .filter_by(
+                    chat_id=chat_id,
+                )
+                .all()
+            )
+            account_ids = [account_chat.account_id for account_chat in account_chats]
+
+            if not account_ids:
+                return []
+
+            return (
+                session.query(AccountModel)
+                .filter(
+                    AccountModel.id.in_(account_ids),
+                )
+                .all()
+            )

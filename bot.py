@@ -3,6 +3,7 @@ import json
 import telebot
 
 from exceptions import NotAdminError
+from models.notification_setting import NotificationSettingsModel
 from repository import settings
 from schemas.account import AccountSchema, CreateAccountSchema
 from schemas.chat import ChatSchema, CreateChatSchema
@@ -952,6 +953,47 @@ def unanswered(message: telebot.types.Message) -> None:
         message=message,
         text="Не отвеченные сообщения:\n\n" + "\n".join(unanswered_list),  # noqa: RUF001
     )
+
+
+@bot.message_handler(commands=["balances"])
+def balances(message: telebot.types.Message) -> None:
+    chat_service = get_chat_service()
+    account_service = get_account_service()
+    transaction_service = get_transaction_service()
+
+    chat = chat_service.get_chat_by_external_id(
+        external_id=str(message.chat.id),
+    )
+
+    accounts = account_service.get_accounts_per_chat(
+        chat_id=chat.id,
+    )
+
+    balances = [
+        transaction_service.get_balance(
+            account_id=account.id,
+        )
+        for account in accounts
+    ]
+
+    balances_text = "Балансы:\n\n"
+
+    for balance, account in zip(balances, accounts, strict=False):
+        if not balance:
+            balances_text += f"Информация отсутствует ({account.name})\n\n"
+            continue
+
+        balances_text += NotificationSettingsModel.balance_message_base(
+            balance_data=balance,
+            account_name=account.name,
+        )
+
+    for chunk in telebot.util.smart_split(balances_text):
+        telebot.util.antiflood(
+            bot.reply_to,
+            message=message,
+            text=chunk,
+        )
 
 
 @bot.message_handler(func=reply_to_bot_message_filter)

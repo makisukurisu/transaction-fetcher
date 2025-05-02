@@ -137,6 +137,31 @@ class AccountService:
             account_data=account,
         )
 
+    def get_accounts_per_chat(
+        self,
+        chat_id: int,
+    ) -> list[AccountModel]:
+        """
+        Get all accounts for a given chat.
+        """
+        accounts = self.account_repository.get_all_accounts_for_chat(
+            chat_id=chat_id,
+        )
+
+        db_logger.info(
+            {
+                "msg": f"Showing {len(accounts)} accounts for chat {chat_id}",
+            },
+        )
+        db_logger.debug(
+            {
+                "msg": "Received the following accounts",
+                "accounts": accounts,
+            },
+        )
+
+        return accounts
+
 
 def get_account_service() -> AccountService:
     """

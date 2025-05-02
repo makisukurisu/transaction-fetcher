@@ -31,6 +31,13 @@ class ChatService:
         """Returns a chat by id."""
         return self.chat_repository.get_chat_by_id(chat_id)
 
+    def get_chat_by_external_id(
+        self,
+        external_id: str,
+    ) -> ChatModel | None:
+        """Returns a chat by external id."""
+        return self.chat_repository.get_chat_by_external_id(external_id)
+
     def get_chats(
         self,
         filters: ListChatSchema | None = None,
