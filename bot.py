@@ -988,7 +988,7 @@ def balances(message: telebot.types.Message) -> None:
             account_name=account.name,
         )
 
-        balances_text += "\n\n"
+        balances_text += "\n--------------------------\n"
 
     for chunk in telebot.util.smart_split(balances_text):
         telebot.util.antiflood(
