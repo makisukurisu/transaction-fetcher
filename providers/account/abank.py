@@ -208,9 +208,12 @@ class ABankProvider(BaseAccountProvider):
 
         filename = f"/tmp/abank_{self._account.id}_balance"
 
-        with open(filename) as f:
-            data = f.read()
-            last_balance = Decimal(data) if data else Decimal(0)
+        try:
+            with open(filename) as f:
+                data = f.read()
+                last_balance = Decimal(data) if data else Decimal(0)
+        except FileNotFoundError:
+            last_balance = Decimal(0)
 
         for company in accounts_response_data.companies:
             for account in company.accounts:
