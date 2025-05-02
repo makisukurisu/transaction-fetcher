@@ -11,13 +11,13 @@ from zeep import Client
 
 from enums.transaction import TransactionType
 from providers.account.base import BaseAccountProvider
+from schemas.account import BalanceSchema
 from schemas.base import BaseSchema
 from schemas.transaction import TransactionSchema
 from services.currency import get_currency_by_alpha_code
 
 if TYPE_CHECKING:
     from models.account import AccountModel
-    from schemas.account import BalanceSchema
 
 nova_pay_timezone = pytz.timezone("Europe/Kyiv")
 
