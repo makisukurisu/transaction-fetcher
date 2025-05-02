@@ -948,7 +948,7 @@ def unanswered(message: telebot.types.Message) -> None:
         items.append(
             UnansweredNotificationSchema(
                 account_name=transaction.account.name,
-                amount_as_string=transaction.amount_as_string,
+                amount=transaction.amount_as_string,
                 at_time=transaction.at_time,
                 message_link=f"<a href='https://t.me/c/{notification.external_chat_id.replace('-100', '')}/{notification.external_message_id}'>{'{msg}'}</a>",  # noqa: E501
             )
