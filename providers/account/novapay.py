@@ -17,6 +17,7 @@ from services.currency import get_currency_by_alpha_code
 
 if TYPE_CHECKING:
     from models.account import AccountModel
+    from schemas.account import BalanceSchema
 
 nova_pay_timezone = pytz.timezone("Europe/Kyiv")
 
@@ -170,3 +171,30 @@ class NovaPayProvider(BaseAccountProvider):
         self.configuration.principal = refresh_response["new_principal"]
 
         return self.configuration.model_dump()
+
+    def get_balance(self) -> "BalanceSchema | None":
+        now = datetime.datetime.now(tz=nova_pay_timezone)
+        one_day_ago = now - datetime.timedelta(days=1)
+
+        account_extract = self.client.service.GetAccountExtract(
+            {
+                "request_ref": str(uuid4()),
+                "principal": self.configuration.principal,
+                "account_id": self.configuration.account_id,
+                "date_to": now.strftime("%d.%m.%Y"),
+                "date_from": one_day_ago.strftime("%d.%m.%Y"),
+            }
+        )
+
+        extract_data = account_extract["extract"]
+
+        extract = ET.fromstring(extract_data)
+        data = extract.find("ExtractHead/GetExtractForXML")
+
+        return BalanceSchema(
+            currency=980,
+            start_balance=Decimal(data.find("InCome").text),
+            end_balance=Decimal(data.find("OutCome").text),
+            deposited=Decimal(data.find("CreditedAmount").text),
+            withdrawn=Decimal(data.find("DebitedAmount").text),
+        )

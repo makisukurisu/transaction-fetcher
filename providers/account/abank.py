@@ -206,15 +206,25 @@ class ABankProvider(BaseAccountProvider):
             accounts_response.json(),
         )
 
+        filename = f"/tmp/abank_{self._account.id}_balance"
+
+        with open(filename) as f:
+            data = f.read()
+            last_balance = Decimal(data) if data else Decimal(0)
+
         for company in accounts_response_data.companies:
             for account in company.accounts:
                 if account.iban == self.iban:
+                    with open(filename, "w") as f:
+                        f.write(str(account.balance_available))
+
                     return BalanceSchema(
                         currency=980,  # Assuming UAH
-                        start_balance=Decimal(0),
+                        start_balance=last_balance,
                         end_balance=account.balance_available,
                         deposited=None,
                         withdrawn=None,
                         at_time=datetime.datetime.now(tz=abank_timezone),
                     )
+
         return None
