@@ -79,7 +79,8 @@ class TransactionRepository:
             main_logger.debug(
                 {
                     "msg": "Fetched transactions",
-                    "account": account,
+                    "account.id": account.id,
+                    "account.name": account.name,
                     "provider": account.provider,
                     "len(result)": len(result),
                     "result": result,
