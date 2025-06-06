@@ -23,6 +23,8 @@ class TelegramChatProvider(BaseChatProvider):
         bot = telebot.TeleBot(
             self.bot_token,
             parse_mode=parse_mode,
+            # May cause problems in the long run
+            threaded=False,
         )
 
         message_id: int | None = None
