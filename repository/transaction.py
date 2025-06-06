@@ -74,7 +74,19 @@ class TransactionRepository:
         integration = provider_class(account)
 
         try:
-            return integration.get_transactions()
+            result = integration.get_transactions()
+
+            main_logger.debug(
+                {
+                    "msg": "Fetched transactions",
+                    "account": account,
+                    "provider": account.provider,
+                    "len(result)": len(result),
+                    "result": result,
+                }
+            )
+
+            return result
         except Exception as e:  # noqa: BLE001
             from services.chat import get_chat_service
 

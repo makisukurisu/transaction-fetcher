@@ -1,9 +1,11 @@
 import logging
 import logging.handlers
 
+from repository.settings import settings
+
 db_logger = logging.getLogger("db")
 
-db_logger.setLevel(logging.INFO)
+db_logger.setLevel(settings.DB_LOG_LEVEL)
 db_logger.propagate = False
 db_logger.addHandler(logging.StreamHandler())
 db_logger.handlers[0].setFormatter(
@@ -12,7 +14,7 @@ db_logger.handlers[0].setFormatter(
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 )
-db_logger.handlers[0].setLevel(logging.INFO)
+db_logger.handlers[0].setLevel(settings.DB_LOG_LEVEL)
 
 db_logger.addHandler(
     logging.handlers.RotatingFileHandler(
@@ -27,11 +29,11 @@ db_logger.handlers[1].setFormatter(
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 )
-db_logger.handlers[1].setLevel(logging.WARNING)
+db_logger.handlers[1].setLevel(settings.DB_LOG_LEVEL)
 
 
 main_logger = logging.getLogger("main")
-main_logger.setLevel(logging.INFO)
+main_logger.setLevel(settings.MAIN_LOG_LEVEL)
 main_logger.propagate = False
 main_logger.addHandler(logging.StreamHandler())
 main_logger.handlers[0].setFormatter(
@@ -40,7 +42,7 @@ main_logger.handlers[0].setFormatter(
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 )
-main_logger.handlers[0].setLevel(logging.INFO)
+main_logger.handlers[0].setLevel(settings.MAIN_LOG_LEVEL)
 main_logger.addHandler(
     logging.handlers.RotatingFileHandler(
         "main.log",
@@ -54,4 +56,4 @@ main_logger.handlers[1].setFormatter(
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 )
-main_logger.handlers[1].setLevel(logging.WARNING)
+main_logger.handlers[1].setLevel(settings.MAIN_LOG_LEVEL)

@@ -1,3 +1,5 @@
+from typing import Literal
+
 import pydantic
 import pydantic_settings
 import pytz
@@ -14,6 +16,15 @@ class Settings(pydantic_settings.BaseSettings):
     )
     TELEGRAM_BOT_TOKEN: str = pydantic.Field(
         description="Token for the telegram bot. You can get it from @BotFather.",
+    )
+
+    MAIN_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = pydantic.Field(
+        default="INFO",
+        description="Log level for the main logger.",
+    )
+    DB_LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = pydantic.Field(
+        default="WARNING",
+        description="Log level for the database logger.",
     )
 
     @property
