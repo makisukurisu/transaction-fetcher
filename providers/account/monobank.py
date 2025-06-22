@@ -88,6 +88,19 @@ class MonoBankTransaction(BaseMonoBankSchema):
     )
 
     def to_transaction_schema(self) -> TransactionSchema:
+        description = ""
+
+        if self.description:
+            # Using both latin and cyrillic i letters
+            if self.description.startswith("Від: ") or self.description.startswith("Вiд: "):  # noqa: RUF001
+                description += f"{self.description}\n"
+            else:
+                description += f"Опис: {self.description}\n"
+        if self.comment:
+            description += f"Коментар: {self.comment}\n"
+
+        description = description.strip()
+
         return TransactionSchema(
             unique_id=self.id,
             type=TransactionType.DEPOSIT if self.amount > 0 else TransactionType.WITHDRAWAL,
@@ -95,7 +108,7 @@ class MonoBankTransaction(BaseMonoBankSchema):
             currency=get_currency_by_numerical_code(
                 self.currency_code,
             ),
-            description=self.comment or self.description,
+            description=description,
             at_time=datetime.datetime.fromtimestamp(
                 self.time,
                 tz=monobank_timezone,
