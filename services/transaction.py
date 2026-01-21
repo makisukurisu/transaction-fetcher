@@ -26,7 +26,7 @@ class TransactionService:
             self._run_iteration()
             time.sleep(60)
 
-    @handle_service_exception("transaction service")
+    @handle_service_exception("transaction service", main_logger)
     def _run_iteration(self) -> None:
         """Execute a single iteration of the transaction service."""
         main_logger.info("Fetching transactions...")

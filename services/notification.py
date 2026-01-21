@@ -35,7 +35,7 @@ class NotificationService:
             self._run_iteration()
             time.sleep(60)
 
-    @handle_service_exception("notification service")
+    @handle_service_exception("notification service", main_logger)
     def _run_iteration(self) -> None:
         """Execute a single iteration of the notification service."""
         main_logger.info("Starting notification service")

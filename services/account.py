@@ -27,7 +27,7 @@ class AccountService:
             self._run_iteration()
             time.sleep(60 * 60)  # 1 hour
 
-    @handle_service_exception("account service")
+    @handle_service_exception("account service", db_logger)
     def _run_iteration(self) -> None:
         """Execute a single iteration of the account service."""
         db_logger.info(

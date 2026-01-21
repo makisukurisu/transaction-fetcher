@@ -1,4 +1,5 @@
 import functools
+import logging
 from collections.abc import Callable
 from decimal import Decimal
 from typing import Any, TypeVar
@@ -6,12 +7,16 @@ from typing import Any, TypeVar
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-def handle_service_exception(service_name: str) -> Callable[[F], F]:
+def handle_service_exception(
+    service_name: str,
+    logger: logging.Logger,
+) -> Callable[[F], F]:
     """
     Decorator to handle exceptions in service run() methods.
 
     Args:
         service_name: The name of the service for logging purposes
+        logger: The logger to use for error logging
     """
     def decorator(func: F) -> F:
         @functools.wraps(func)
@@ -19,11 +24,7 @@ def handle_service_exception(service_name: str) -> Callable[[F], F]:
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                from logger import db_logger, main_logger  # noqa: PLC0415
                 from services.chat import get_chat_service  # noqa: PLC0415
-
-                # Use appropriate logger based on service name
-                logger = db_logger if "account" in service_name.lower() else main_logger
 
                 logger.critical(
                     f"Error in {service_name}: {e}",
