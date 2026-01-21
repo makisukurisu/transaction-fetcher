@@ -17,6 +17,11 @@ class ChatService:
     def __init__(self, chat_repository: "ChatRepository") -> None:
         self.chat_repository = chat_repository
 
+    def _validate_chat_exists(self, chat: ChatModel | None, chat_id: int) -> None:
+        """Validate that a chat exists, raising ValueError if not."""
+        if not chat:
+            raise ValueError(f"Chat with {chat_id=} not found")
+
     def add_chat(
         self,
         data: "CreateChatSchema",
@@ -62,8 +67,7 @@ class ChatService:
             chat_id=chat_id,
         )
 
-        if not chat:
-            raise ValueError(f"Chat with {chat_id=} not found")
+        self._validate_chat_exists(chat, chat_id)
 
         provider_class = get_chat_provider_class(chat.provider)
         integration = provider_class(
@@ -85,8 +89,7 @@ class ChatService:
         """Adds an account to the chat."""
         chat = self.chat_repository.get_chat_by_id(chat_id)
 
-        if not chat:
-            raise ValueError(f"Chat with {chat_id=} not found")
+        self._validate_chat_exists(chat, chat_id)
 
         self.chat_repository.add_account_to_chat(
             chat_id=chat.id,

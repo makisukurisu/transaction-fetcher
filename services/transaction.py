@@ -6,6 +6,7 @@ from logger import main_logger
 from repository import settings
 from repository.transaction import TransactionRepository
 from services.notification import get_notification_service
+from utils import handle_service_exception
 
 if TYPE_CHECKING:
     from models.transaction import TransactionModel
@@ -22,26 +23,16 @@ class TransactionService:
 
     def run(self) -> None:
         while True:
-            try:
-                main_logger.info("Fetching transactions...")
-                transactions = self.fetch_transactions()
-                for transaction in transactions:
-                    self.process_transaction(transaction)
-                time.sleep(60)
-            except Exception as e:  # noqa: BLE001
-                from services.chat import get_chat_service
+            self._run_iteration()
+            time.sleep(60)
 
-                main_logger.critical(
-                    f"Error in transaction service: {e}",
-                    stack_info=True,
-                    exc_info=True,
-                )
-
-                get_chat_service().notify_management(
-                    text="Error in transaction service",
-                    exception=e,
-                )
-                time.sleep(60)
+    @handle_service_exception("transaction service")
+    def _run_iteration(self) -> None:
+        """Execute a single iteration of the transaction service."""
+        main_logger.info("Fetching transactions...")
+        transactions = self.fetch_transactions()
+        for transaction in transactions:
+            self.process_transaction(transaction)
 
     def get_transaction_by_id(self, transaction_id: int) -> "TransactionModel | None":
         return self.transaction_repository.get_transaction_by_id(

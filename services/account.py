@@ -8,6 +8,7 @@ from providers.account.get import get_provider_class
 from repository import settings
 from repository.account import AccountRepository
 from schemas.account import CreateAccountSchema
+from utils import handle_service_exception
 
 
 class AccountService:
@@ -23,33 +24,25 @@ class AccountService:
         """
         db_logger.info("Starting account service")
         while True:
-            try:
-                db_logger.info(
-                    {
-                        "msg": "Updating account data for all accounts",
-                    },
-                )
-                accounts = self.get_accounts(fetch_all=True)
-                for account in accounts:
-                    self.update_account_data(account_id=account.id)
-                db_logger.info(
-                    {
-                        "msg": "Finished updating account data for all accounts",
-                    }
-                )
-                time.sleep(60 * 60)  # 1 hour
-            except Exception as e:  # noqa: BLE001
-                db_logger.critical(
-                    f"Error in account service: {e}",
-                    stack_info=True,
-                    exc_info=True,
-                )
-                from services.chat import get_chat_service
+            self._run_iteration()
+            time.sleep(60 * 60)  # 1 hour
 
-                get_chat_service().notify_management(
-                    text="Error in account service",
-                    exception=e,
-                )
+    @handle_service_exception("account service")
+    def _run_iteration(self) -> None:
+        """Execute a single iteration of the account service."""
+        db_logger.info(
+            {
+                "msg": "Updating account data for all accounts",
+            },
+        )
+        accounts = self.get_accounts(fetch_all=True)
+        for account in accounts:
+            self.update_account_data(account_id=account.id)
+        db_logger.info(
+            {
+                "msg": "Finished updating account data for all accounts",
+            }
+        )
 
     def get_account_by_id(
         self,
