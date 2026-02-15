@@ -15,6 +15,7 @@ from schemas.notification import (
     UnansweredNotificationSchema,
 )
 from services.chat import get_chat_service
+from utils import handle_service_exception
 
 if TYPE_CHECKING:
     from models.notification import NotificationModel
@@ -31,31 +32,24 @@ class NotificationService:
 
     def run(self) -> None:
         while True:
-            try:
-                main_logger.info("Starting notification service")
-                settings = self.get_notification_settings_for_processing()
+            self._run_iteration()
+            time.sleep(60)
 
-                main_logger.info(
-                    {
-                        "msg": "Found notification settings for processing",
-                        "count": len(settings),
-                    }
-                )
+    @handle_service_exception("notification service", main_logger)
+    def _run_iteration(self) -> None:
+        """Execute a single iteration of the notification service."""
+        main_logger.info("Starting notification service")
+        settings = self.get_notification_settings_for_processing()
 
-                for notification in settings:
-                    self.process_notification(notification)
-                time.sleep(60)
-            except Exception as e:  # noqa: BLE001
-                main_logger.critical(
-                    f"Error in notification service: {e}",
-                    stack_info=True,
-                    exc_info=True,
-                )
-                get_chat_service().notify_management(
-                    text="Error in notification service",
-                    exception=e,
-                )
-                time.sleep(60)
+        main_logger.info(
+            {
+                "msg": "Found notification settings for processing",
+                "count": len(settings),
+            }
+        )
+
+        for notification in settings:
+            self.process_notification(notification)
 
     def create_notification(
         self,

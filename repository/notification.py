@@ -2,7 +2,7 @@ import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import literal
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Query, Session, joinedload
 
 from enums.notification_setting import NotificationType
 from models.account_chat_model import AccountChatModel
@@ -20,55 +20,43 @@ class NotificationRepository:
     def __init__(self, db: "Engine") -> None:
         self.db = db
 
+    def _get_notification_settings_query(self, session: Session) -> Query:
+        """
+        Build the base query for notification settings.
+
+        Returns a query that filters for scheduled notifications and excludes
+        DEPOSIT and WITHDRAWAL types.
+        """
+        return (
+            session.query(NotificationSettingsModel)
+            .options(
+                joinedload(
+                    NotificationSettingsModel.account_chat,
+                ).joinedload(
+                    AccountChatModel.account,
+                ),
+            )
+            .filter(
+                NotificationSettingsModel.schedule.is_not(None),
+                NotificationSettingsModel.notification_type.not_in(
+                    [
+                        NotificationType.DEPOSIT,
+                        NotificationType.WITHDRAWAL,
+                    ]
+                ),
+            )
+        )
+
     def get_notification_settings(self) -> list["NotificationSettingsModel"]:
         with Session(self.db) as session:
-            q = (
-                session.query(NotificationSettingsModel)
-                .options(
-                    joinedload(
-                        NotificationSettingsModel.account_chat,
-                    ).joinedload(
-                        AccountChatModel.account,
-                    ),
-                )
-                .filter(
-                    NotificationSettingsModel.schedule.is_not(None),
-                    NotificationSettingsModel.notification_type.not_in(
-                        [
-                            NotificationType.DEPOSIT,
-                            NotificationType.WITHDRAWAL,
-                        ]
-                    ),
-                )
-            )
-
-            return q.all()
+            return self._get_notification_settings_query(session).all()
 
     def get_notification_settings_schemas(
         self,
     ) -> list["NotificationSettingsSchema"]:
         with Session(self.db) as session:
-            q = (
-                session.query(NotificationSettingsModel)
-                .options(
-                    joinedload(
-                        NotificationSettingsModel.account_chat,
-                    ).joinedload(
-                        AccountChatModel.account,
-                    ),
-                )
-                .filter(
-                    NotificationSettingsModel.schedule.is_not(None),
-                    NotificationSettingsModel.notification_type.not_in(
-                        [
-                            NotificationType.DEPOSIT,
-                            NotificationType.WITHDRAWAL,
-                        ]
-                    ),
-                )
-            )
-
-            return [NotificationSettingsSchema.model_validate(entity) for entity in q.all()]
+            entities = self._get_notification_settings_query(session).all()
+            return [NotificationSettingsSchema.model_validate(entity) for entity in entities]
 
     def mark_notification_setting_as_ran(
         self,
