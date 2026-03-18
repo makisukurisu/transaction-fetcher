@@ -2,20 +2,20 @@ import json
 
 import telebot
 
-from exceptions import NotAdminError
-from models.notification_setting import NotificationSettingsModel
-from repository import settings
-from schemas.account import AccountSchema, CreateAccountSchema
-from schemas.chat import ChatSchema, CreateChatSchema
-from schemas.notification import CreateNotificationSchema, UnansweredNotificationSchema
-from services.account import get_account_service
-from services.chat import get_chat_service
-from services.notification import get_notification_service
-from services.transaction import get_transaction_service
+from fetcher.exceptions import NotAdminError
+from fetcher.models.notification_setting import NotificationSettingsModel
+from fetcher.repository import settings
+from fetcher.schemas.account import AccountSchema, CreateAccountSchema
+from fetcher.schemas.chat import ChatSchema, CreateChatSchema
+from fetcher.schemas.notification import CreateNotificationSchema, UnansweredNotificationSchema
+from fetcher.services.account import get_account_service
+from fetcher.services.chat import get_chat_service
+from fetcher.services.notification import get_notification_service
+from fetcher.services.transaction import get_transaction_service
 
 
 class CustomExceptionHandler(telebot.ExceptionHandler):
-    def handle(self, exception: Exception) -> None:
+    def handle(self, exception: Exception) -> bool:  # pyright: ignore[reportIncompatibleMethodOverride]
         handled = super().handle(exception)
 
         if handled:
@@ -58,6 +58,7 @@ def check_is_manager(message: telebot.types.Message) -> bool:
         raise NotAdminError(
             message=message,
         )
+    return True
 
 
 @bot.message_handler(commands=["configure"])
@@ -239,6 +240,8 @@ def show_account(call: telebot.types.CallbackQuery) -> None:
     Handle editing an account configuration.
     """
     message = call.message
+
+    assert call.data
 
     account_id = call.data.split("_")[2]
 
@@ -590,6 +593,8 @@ def handle_account_addition_to_chat(message: telebot.types.Message) -> None:
 
 
 def view_chat_accounts(call: telebot.types.CallbackQuery) -> None:
+    assert call.data
+
     message = call.message
 
     chat_id = call.data.split("_")[2]
@@ -640,6 +645,8 @@ def view_chat_accounts(call: telebot.types.CallbackQuery) -> None:
 
 
 def show_account_chat(call: telebot.types.CallbackQuery) -> None:
+    assert call.data
+
     message = call.message
 
     account_chat_id = call.data.split("_")[2]
@@ -701,6 +708,8 @@ def delete_account_chat(call: telebot.types.CallbackQuery) -> None:
     """
     Handle deleting an account chat configuration.
     """
+    assert call.data
+
     message = call.message
 
     account_chat_id = int(call.data.split("_")[2])
@@ -724,6 +733,8 @@ def delete_account_chat(call: telebot.types.CallbackQuery) -> None:
 
 
 def add_notification(call: telebot.types.CallbackQuery) -> None:
+    assert call.data
+
     message = call.message
 
     account_chat_id = call.data.split("_")[2]
@@ -761,6 +772,9 @@ def add_notification(call: telebot.types.CallbackQuery) -> None:
 
 def handle_notification_addition(message: telebot.types.Message) -> None:
     check_is_manager(message)
+
+    assert message.text
+    assert message.from_user
 
     try:
         create_notification = CreateNotificationSchema.model_validate_json(
@@ -803,9 +817,11 @@ def handle_notification_addition(message: telebot.types.Message) -> None:
 
 
 def view_notifications(call: telebot.types.CallbackQuery) -> None:
+    assert call.data
+
     message = call.message
 
-    account_chat_id = call.data.split("_")[2]
+    account_chat_id = int(call.data.split("_")[2])
 
     notification_service = get_notification_service()
 
@@ -850,6 +866,8 @@ def delete_notification_setting(call: telebot.types.CallbackQuery) -> None:
     """
     Handle deleting a notification configuration.
     """
+    assert call.data
+
     message = call.message
 
     notification_setting_id = int(call.data.split("_")[2])
@@ -869,6 +887,7 @@ def delete_notification_setting(call: telebot.types.CallbackQuery) -> None:
         text=text,
         parse_mode="HTML",
     )
+
     list_chats(call)
 
 
@@ -879,7 +898,10 @@ def handle_callback_query(  # noqa: C901, PLR0911, PLR0912
     """
     Handle callback queries from inline buttons.
     """
-    check_is_manager(call.message)
+    if isinstance(call.message, telebot.types.Message):
+        check_is_manager(call.message)
+
+    assert call.data
 
     if call.data == "account_settings":
         return account_settings(call)
@@ -915,7 +937,7 @@ def handle_callback_query(  # noqa: C901, PLR0911, PLR0912
     if call.data.startswith("delete_notification_"):
         return delete_notification_setting(call)
 
-    if call.data == "configure":
+    if call.data == "configure" and isinstance(call.message, telebot.types.Message):
         return configure(call.message)
 
     bot.send_message(
@@ -923,6 +945,7 @@ def handle_callback_query(  # noqa: C901, PLR0911, PLR0912
         text="Unknown command.",
         parse_mode="HTML",
     )
+
     return None
 
 
@@ -1030,6 +1053,8 @@ def new_member_message_filter(
 def bot_joined_group_message_filter(
     message: telebot.types.Message,
 ) -> bool:
+    assert bot.bot_id
+
     if message.new_chat_members is None:
         return False
 

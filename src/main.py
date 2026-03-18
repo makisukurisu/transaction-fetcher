@@ -15,14 +15,15 @@ import threading
 
 import typer
 
-import db
-from repository import settings
-from repository.account import AccountRepository
-from repository.notification import NotificationRepository
-from repository.transaction import TransactionRepository
-from services.account import AccountService
-from services.notification import NotificationService
-from services.transaction import TransactionService
+from fetcher.bot import bot
+from fetcher.db import get_engine
+from fetcher.repository import settings
+from fetcher.repository.account import AccountRepository
+from fetcher.repository.notification import NotificationRepository
+from fetcher.repository.transaction import TransactionRepository
+from fetcher.services.account import AccountService
+from fetcher.services.notification import NotificationService
+from fetcher.services.transaction import TransactionService
 
 app = typer.Typer()
 
@@ -34,9 +35,8 @@ def run() -> None:
 
     This command starts the bot and runs the transaction and notification services in separate threads.
     """  # noqa: E501
-    from bot import bot
 
-    database = db.get_engine(settings.settings.DB_URL)
+    database = get_engine(settings.settings.DB_URL)
 
     transaction_repository = TransactionRepository(database)
     notification_repository = NotificationRepository(database)
@@ -77,7 +77,7 @@ def migrate() -> None:
     from models.base import BaseModel
 
     BaseModel.metadata.create_all(
-        db.get_engine(settings.settings.DB_URL),
+        get_engine(settings.settings.DB_URL),
     )
 
 
