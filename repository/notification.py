@@ -67,7 +67,13 @@ class NotificationRepository:
                 NotificationSettingsModel.id == setting.id,
             )
             entity = q.first()
-            entity.last_sent_at = datetime.datetime.now(tz=datetime.UTC).isoformat()
+
+            if not entity:
+                return
+
+            entity.last_sent_at = datetime.datetime.now(
+                tz=datetime.UTC,
+            ).isoformat()
             session.add(entity)
             session.commit()
 
@@ -177,7 +183,7 @@ class NotificationRepository:
         self,
         account_chat_id: int,
         notification_data: CreateNotificationSchema,
-    ) -> NotificationModel:
+    ) -> NotificationSettingsModel:
         with Session(self.db) as session:
             notification_setting = NotificationSettingsModel(
                 account_chat_id=account_chat_id,

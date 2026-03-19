@@ -1,4 +1,5 @@
 import datetime
+import re
 from decimal import Decimal
 from enum import StrEnum
 
@@ -6,6 +7,7 @@ import pydantic
 import pytz
 
 from enums.transaction import TransactionType
+from logger import main_logger
 from providers.account.base import BaseAccountProvider, BaseAccountProviderConfiguration
 from repository import settings
 from schemas.account import BalanceSchema
@@ -36,6 +38,18 @@ class PrivatBankTransactionType(StrEnum):
         raise ValueError(f"Unknown transaction type: {self}")
 
 
+class PrivatBankTransactionStatus(StrEnum):
+    PENDING = "p"
+    TERMINATED = "t"
+    COMPLETED = "r"
+    REJECTED = "n"
+
+
+class PrivatBankIsRealStatus(StrEnum):
+    REAL = "r"
+    IMAGINARY = "i"
+
+
 class PrivatBankTransaction(BaseSchema):
     unique_id: str = pydantic.Field(validation_alias="ID")
     amount: Decimal = pydantic.Field(validation_alias="SUM")
@@ -43,6 +57,12 @@ class PrivatBankTransaction(BaseSchema):
     description: str = pydantic.Field(validation_alias="OSND")
     transaction_type: PrivatBankTransactionType = pydantic.Field(
         validation_alias="TRANTYPE",
+    )
+    is_real: PrivatBankIsRealStatus = pydantic.Field(
+        validation_alias="FL_REAL",
+    )
+    status: PrivatBankTransactionStatus = pydantic.Field(
+        validation_alias="PR_PR",
     )
 
     processed_at: datetime.datetime = pydantic.Field(
@@ -55,11 +75,9 @@ class PrivatBankTransaction(BaseSchema):
     )
     @classmethod
     def convert_description(cls, value: str) -> str:
-        import re
-
         # As per request
         matches = re.search(
-            r"(,\sквитанція\s(?:[\x00-\x7F]*\b))",
+            r"(,\sквитанція\s(?:[\x00-\x7F]*\b))",  # noqa: RUF001
             value,
             re.IGNORECASE,
         )
@@ -88,6 +106,7 @@ class PrivatBankTransaction(BaseSchema):
             amount=self.amount,
             currency=currency,
             type=self.transaction_type.as_transaction_type,
+            base=self,
         )
 
 
@@ -142,7 +161,7 @@ class PrivatBankFOPProvider(BaseAccountProvider):
     def iban(self) -> str:
         return self.configuration.iban
 
-    def get_configuration_type(self) -> type[PrivatBankProviderConfiguration]:
+    def get_configuration_type(self) -> type[PrivatBankProviderConfiguration]:  # type: ignore
         return PrivatBankProviderConfiguration
 
     @property
@@ -188,7 +207,38 @@ class PrivatBankFOPProvider(BaseAccountProvider):
             response.json(),
         )
 
-        return [transaction.to_transaction_schema() for transaction in response_data.transactions]
+        def transaction_filter(transaction: PrivatBankTransaction) -> bool:
+            if transaction.status != PrivatBankTransactionStatus.COMPLETED:
+                main_logger.warning(
+                    {
+                        "msg": "Skipping transaction with non-completed status",
+                        "transaction": {
+                            "_obj": transaction,
+                            "status": transaction.status,
+                        },
+                    }
+                )
+                return False
+
+            if transaction.is_real != PrivatBankIsRealStatus.REAL:
+                main_logger.warning(
+                    {
+                        "msg": "Skipping transaction isn't real",
+                        "transaction": {
+                            "_obj": transaction,
+                            "status": transaction.status,
+                            "is_real": transaction.is_real,
+                        },
+                    }
+                )
+                return False
+
+            return True
+
+        return [
+            transaction.to_transaction_schema()
+            for transaction in filter(transaction_filter, response_data.transactions)
+        ]
 
     def get_balance(self) -> "BalanceSchema | None":
         path = "/statements/balance"

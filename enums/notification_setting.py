@@ -5,6 +5,7 @@ from enums.transaction import TransactionType
 
 if TYPE_CHECKING:
     from models.transaction import TransactionModel
+    from schemas.transaction import DBTransactionSchema
 
 
 class NotificationType(StrEnum):
@@ -17,7 +18,7 @@ class NotificationType(StrEnum):
     @classmethod
     def from_transaction(
         cls,
-        transaction: "TransactionModel",
+        transaction: "DBTransactionSchema | TransactionModel",
     ) -> "NotificationType":
         if transaction.type == TransactionType.DEPOSIT:
             return cls.DEPOSIT

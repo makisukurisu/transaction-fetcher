@@ -3,4 +3,7 @@
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.defaultFoldingRangeProvider": "charliermarsh.ruff",
     "python.analysis.autoImportCompletions": false,
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    },
 }

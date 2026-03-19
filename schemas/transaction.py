@@ -17,6 +17,8 @@ class TransactionSchema(BaseSchema):
     description: str | None = None
     at_time: datetime.datetime | None = None
 
+    base: BaseSchema | None = None
+
 
 class DBTransactionSchema(BaseSchema):
     id: int
