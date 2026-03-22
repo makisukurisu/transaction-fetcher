@@ -12,7 +12,7 @@ from fetcher.schemas.account import BalanceSchema
 from fetcher.schemas.base import BaseSchema
 from fetcher.schemas.transaction import TransactionSchema
 from fetcher.services.currency import get_currency_by_numerical_code
-from src.fetcher.utils import amount_with_sign
+from fetcher.utils import amount_with_sign
 
 monobank_timezone = pytz.timezone("UTC")
 
