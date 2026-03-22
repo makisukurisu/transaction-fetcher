@@ -95,15 +95,18 @@ def _run_bot() -> None:
 
 def _build_workers() -> list[Worker]:
     database = get_engine(settings.settings.DB_URL)
+    chat_service = get_chat_service()
 
+    account_service = AccountService(
+        account_repository=AccountRepository(database),
+    )
     transaction_service = TransactionService(
         transaction_repository=TransactionRepository(database),
+        account_service=account_service,
+        chat_service=chat_service,
     )
     notification_service = NotificationService(
         notification_repository=NotificationRepository(database),
-    )
-    account_service = AccountService(
-        account_repository=AccountRepository(database),
     )
 
     return [
