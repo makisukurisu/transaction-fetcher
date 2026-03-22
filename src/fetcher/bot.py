@@ -1,6 +1,9 @@
 import json
 
 import telebot
+import telebot.types
+import telebot.util
+from telebot.storage import StateMemoryStorage
 
 from fetcher.exceptions import NotAdminError
 from fetcher.models.notification_setting import NotificationSettingsModel
@@ -33,13 +36,13 @@ class CustomExceptionHandler(telebot.ExceptionHandler):
                 bot.send_message,
                 chat_id=settings.settings.TELEGRAM_MANAGEMENT_CHAT_ID,
                 text=chunk,
-                parse_mode="",
+                parse_mode="HTML",
             )
 
         return True
 
 
-storage = telebot.StateMemoryStorage()
+storage = StateMemoryStorage()
 
 
 bot = telebot.TeleBot(
@@ -104,6 +107,7 @@ def account_settings(call: telebot.types.CallbackQuery) -> None:
     Handle account settings configuration.
     """
     message = call.message
+    assert message is not None
 
     reply_markup = telebot.types.InlineKeyboardMarkup(
         keyboard=[
@@ -137,6 +141,8 @@ def add_account(call: telebot.types.CallbackQuery) -> None:
     """
     message = call.message
 
+    assert message is not None
+
     schema = json.dumps(
         CreateAccountSchema.model_json_schema(),
         indent=4,
@@ -163,7 +169,7 @@ def handle_account_addition(message: telebot.types.Message) -> None:
     check_is_manager(message)
 
     try:
-        create_account = CreateAccountSchema.model_validate_json(json_data=message.text)
+        create_account = CreateAccountSchema.model_validate_json(json_data=message.text)  # pyright: ignore[reportArgumentType]
     except ValueError as e:
         bot_message = bot.send_message(
             chat_id=message.chat.id,
@@ -199,6 +205,8 @@ def list_accounts(call: telebot.types.CallbackQuery) -> None:
     Handle listing accounts configuration.
     """
     message = call.message
+
+    assert message is not None
 
     account_service = get_account_service()
     accounts = account_service.get_accounts()
@@ -241,7 +249,8 @@ def show_account(call: telebot.types.CallbackQuery) -> None:
     """
     message = call.message
 
-    assert call.data
+    assert message is not None
+    assert call.data is not None
 
     account_id = call.data.split("_")[2]
 
@@ -304,6 +313,9 @@ def edit_account(call: telebot.types.CallbackQuery) -> None:
     """
     message = call.message
 
+    assert message is not None
+    assert call.data is not None
+
     account_id = call.data.split("_")[2]
 
     account_service = get_account_service()
@@ -345,6 +357,8 @@ def handle_account_editing(message: telebot.types.Message) -> None:
     """
     check_is_manager(message)
 
+    assert message.text is not None
+
     try:
         account = AccountSchema.model_validate_json(json_data=message.text)
     except ValueError as e:
@@ -365,7 +379,7 @@ def handle_account_editing(message: telebot.types.Message) -> None:
     account_service = get_account_service()
     account_service.edit_account(
         account_id=account.id,
-        account_data=account,
+        account_data=CreateAccountSchema.model_validate(account),
     )
 
     bot.send_message(
@@ -381,6 +395,9 @@ def delete_account(call: telebot.types.CallbackQuery) -> None:
     Handle deleting an account configuration.
     """
     message = call.message
+
+    assert message is not None
+    assert call.data is not None
 
     account_id = int(call.data.split("_")[2])
 
@@ -407,6 +424,8 @@ def reply_to_bot_message_filter(
 ) -> bool:
     if not message.reply_to_message:
         return False
+    if not message.reply_to_message.from_user:
+        return False
     return message.reply_to_message.from_user.id == bot.bot_id
 
 
@@ -414,6 +433,8 @@ def list_chats(
     call: telebot.types.CallbackQuery,
 ) -> None:
     message = call.message
+
+    assert message is not None
 
     chat_service = get_chat_service()
 
@@ -457,11 +478,14 @@ def list_chats(
 def show_chat(call: telebot.types.CallbackQuery) -> None:
     message = call.message
 
+    assert message is not None
+    assert call.data is not None
+
     chat_id = call.data.split("_")[2]
 
     chat_service = get_chat_service()
 
-    chat = chat_service.get_chat_by_id(chat_id=chat_id)
+    chat = chat_service.get_chat_by_id(chat_id=int(chat_id))
 
     if not chat:
         bot.send_message(
@@ -516,6 +540,9 @@ def show_chat(call: telebot.types.CallbackQuery) -> None:
 def add_account_to_chat(call: telebot.types.CallbackQuery) -> None:
     message = call.message
 
+    assert message is not None
+    assert call.data is not None
+
     chat_id = call.data.split("_")[2]
 
     account_service = get_account_service()
@@ -547,17 +574,21 @@ def add_account_to_chat(call: telebot.types.CallbackQuery) -> None:
 def handle_account_addition_to_chat(message: telebot.types.Message) -> None:
     check_is_manager(message)
 
+    assert message.from_user is not None
+
     context = bot.retrieve_data(
         user_id=message.from_user.id,
         chat_id=message.chat.id,
     )
+
+    assert context is not None
 
     chat_id = context.data["kwargs"]["chat_id"]
 
     account_service = get_account_service()
 
     try:
-        account_id = int(message.text)
+        account_id = int(message.text)  # pyright: ignore[reportArgumentType]
     except ValueError:
         bot.send_message(
             chat_id=message.chat.id,
@@ -566,7 +597,7 @@ def handle_account_addition_to_chat(message: telebot.types.Message) -> None:
         )
         return
 
-    account = account_service.get_account_by_id(account_id=account_id)
+    account = account_service.get_account_by_id(account_id=str(account_id))
 
     if not account:
         bot.send_message(
@@ -596,12 +627,13 @@ def view_chat_accounts(call: telebot.types.CallbackQuery) -> None:
     assert call.data
 
     message = call.message
+    assert message is not None
 
     chat_id = call.data.split("_")[2]
 
     chat_service = get_chat_service()
 
-    chat = chat_service.get_chat_by_id(chat_id=chat_id)
+    chat = chat_service.get_chat_by_id(chat_id=int(chat_id))
 
     if not chat:
         bot.send_message(
@@ -648,8 +680,9 @@ def show_account_chat(call: telebot.types.CallbackQuery) -> None:
     assert call.data
 
     message = call.message
+    assert message is not None
 
-    account_chat_id = call.data.split("_")[2]
+    account_chat_id = int(call.data.split("_")[2])
 
     chat_service = get_chat_service()
     account_chat = chat_service.get_account_chat_by_id(account_chat_id=account_chat_id)
@@ -711,6 +744,7 @@ def delete_account_chat(call: telebot.types.CallbackQuery) -> None:
     assert call.data
 
     message = call.message
+    assert message is not None
 
     account_chat_id = int(call.data.split("_")[2])
 
@@ -736,6 +770,7 @@ def add_notification(call: telebot.types.CallbackQuery) -> None:
     assert call.data
 
     message = call.message
+    assert message is not None
 
     account_chat_id = call.data.split("_")[2]
 
@@ -820,6 +855,7 @@ def view_notifications(call: telebot.types.CallbackQuery) -> None:
     assert call.data
 
     message = call.message
+    assert message is not None
 
     account_chat_id = int(call.data.split("_")[2])
 
@@ -869,6 +905,7 @@ def delete_notification_setting(call: telebot.types.CallbackQuery) -> None:
     assert call.data
 
     message = call.message
+    assert message is not None
 
     notification_setting_id = int(call.data.split("_")[2])
 
@@ -940,6 +977,13 @@ def handle_callback_query(  # noqa: C901, PLR0911, PLR0912
     if call.data == "configure" and isinstance(call.message, telebot.types.Message):
         return configure(call.message)
 
+    if not call.message:
+        bot.answer_callback_query(
+            callback_query_id=call.id,
+            text="No message associated with this callback.",
+        )
+        return None
+
     bot.send_message(
         chat_id=call.message.chat.id,
         text="Unknown command.",
@@ -955,7 +999,7 @@ def unanswered(message: telebot.types.Message) -> None:
     transaction_service = get_transaction_service()
 
     notifications = notification_service.unanswered_notifications(
-        external_chat_id=message.chat.id,
+        external_chat_id=str(message.chat.id),
     )
 
     items = []
@@ -999,6 +1043,14 @@ def balances(message: telebot.types.Message) -> None:
         external_id=str(message.chat.id),
     )
 
+    if not chat:
+        bot.send_message(
+            chat_id=message.chat.id,
+            text="Chat not found.",
+            parse_mode="HTML",
+        )
+        return
+
     accounts = account_service.get_accounts_per_chat(
         chat_id=chat.id,
     )
@@ -1038,9 +1090,11 @@ def handle_replies(
 ) -> None:
     notification_service = get_notification_service()
 
+    assert message.reply_to_message is not None
+
     notification_service.mark_as_replied(
-        external_chat_id=message.chat.id,
-        external_message_id=message.reply_to_message.message_id,
+        external_chat_id=str(message.chat.id),
+        external_message_id=str(message.reply_to_message.message_id),
     )
 
 
@@ -1077,7 +1131,7 @@ def bot_joined_group(
 
     chat = chat_service.add_chat(
         CreateChatSchema(
-            name=message.chat.title,
+            name=message.chat.title or "Unnamed Chat",
             external_id=str(message.chat.id),
         )
     )
