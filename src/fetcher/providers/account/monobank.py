@@ -101,7 +101,11 @@ class MonoBankTransaction(BaseMonoBankSchema):
 
         description = description.strip()
 
-        amount = self.operation_amount if self.operation_amount is not None else self.amount
+        amount = self.amount
+
+        if self.operation_amount is not None:
+            amount = self.operation_amount
+            description += f"\nСума в оригінальній валюті: {Decimal(self.amount) / 100}"  # noqa: RUF001
 
         return TransactionSchema(
             unique_id=self.id,
