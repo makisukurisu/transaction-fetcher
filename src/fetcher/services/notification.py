@@ -70,13 +70,16 @@ class NotificationService:
         notifications = self.notification_repository.get_notification_settings_schemas()
 
         for notification in notifications:
+            if notification.schedule is None:
+                continue
+
             cron = Cron()
             cron.from_string(notification.schedule)
 
             start_date = datetime.datetime(
                 2000, 1, 1, 0, 0, 0, tzinfo=settings.settings.default_timezone
             )
-            if notification.last_sent_at:
+            if notification.last_sent_at_dt:
                 start_date = notification.last_sent_at_dt.astimezone(
                     settings.settings.default_timezone
                 )
@@ -169,8 +172,13 @@ class NotificationService:
 
             transaction_service = get_transaction_service()
 
+            external_id = notification_setting.account_chat.chat.external_id
+
+            if external_id is None:
+                return "No external chat ID available for unanswered notifications"
+
             unanswered = self.unanswered_notifications(
-                external_chat_id=notification_setting.account_chat.chat.external_id,
+                external_chat_id=external_id,
             )
 
             items = []
@@ -188,7 +196,7 @@ class NotificationService:
                         account_name=transaction.account.name,
                         amount=transaction.amount_as_string,
                         at_time=transaction.at_time.strftime("%d.%m %H:%M"),
-                        message_link=f"<a href='https://t.me/c/{notification.external_chat_id.replace('-100', '')}/{notification.external_message_id}'>{'{msg}'}</a>",  # noqa: E501
+                        message_link=f"<a href='https://t.me/c/{external_id.replace('-100', '')}/{notification.external_message_id}'>{'{msg}'}</a>",  # noqa: E501
                     )
                 )
 

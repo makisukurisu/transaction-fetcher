@@ -151,6 +151,18 @@ class TransactionRepository:
 
                     session.refresh(transaction_model)
 
+                    main_logger.debug(
+                        {
+                            "msg": "Inserted new transaction",
+                            "account": {
+                                "id": account.id,
+                                "name": account.name,
+                            },
+                            "transaction": transaction,
+                            "transaction_model": transaction_model,
+                        }
+                    )
+
                     new_transactions.append(DBTransactionSchema.model_validate(transaction_model))
 
         main_logger.info(
@@ -165,10 +177,10 @@ class TransactionRepository:
 
     def get_balance(
         self,
-        account_id: int,
+        account_id: str | int,
     ) -> "BalanceSchema | None":
         account_service = get_account_service()
-        account = account_service.get_account_by_id(account_id=account_id)
+        account = account_service.get_account_by_id(account_id=str(account_id))
 
         if not account:
             return None
