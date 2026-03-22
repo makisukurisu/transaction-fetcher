@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.base import BaseModel
+from fetcher.models.base import BaseModel
 
 if TYPE_CHECKING:
-    from models.account import AccountModel
-    from models.chat import ChatModel
-    from models.notification_setting import NotificationSettingsModel
+    from fetcher.models.account import AccountModel
+    from fetcher.models.chat import ChatModel
+    from fetcher.models.notification_setting import NotificationSettingsModel
 
 
 class AccountChatModel(BaseModel):

@@ -4,16 +4,16 @@ from typing import TYPE_CHECKING
 from sqlalchemy import literal
 from sqlalchemy.orm import Query, Session, joinedload
 
-from enums.notification_setting import NotificationType
-from models.account_chat_model import AccountChatModel
-from models.notification import NotificationModel
-from models.notification_setting import NotificationSettingsModel
-from schemas.notification import CreateNotificationSchema, NotificationSettingsSchema
+from fetcher.enums.notification_setting import NotificationType
+from fetcher.models.account_chat_model import AccountChatModel
+from fetcher.models.notification import NotificationModel
+from fetcher.models.notification_setting import NotificationSettingsModel
+from fetcher.schemas.notification import CreateNotificationSchema, NotificationSettingsSchema
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
-    from schemas.transaction import DBTransactionSchema
+    from fetcher.schemas.transaction import DBTransactionSchema
 
 
 class NotificationRepository:

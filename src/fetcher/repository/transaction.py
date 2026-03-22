@@ -2,18 +2,18 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Session, joinedload
 
-from logger import main_logger
-from models.transaction import TransactionModel
-from providers.account.get import get_provider_class
-from schemas.transaction import DBTransactionSchema
-from services.account import get_account_service
+from fetcher.logger import main_logger
+from fetcher.models.transaction import TransactionModel
+from fetcher.providers.account.get import get_provider_class
+from fetcher.schemas.transaction import DBTransactionSchema
+from fetcher.services.account import get_account_service
 
 if TYPE_CHECKING:
     import sqlalchemy
 
-    from models.account import AccountModel
-    from schemas.account import BalanceSchema
-    from schemas.transaction import TransactionSchema
+    from fetcher.models.account import AccountModel
+    from fetcher.schemas.account import BalanceSchema
+    from fetcher.schemas.transaction import TransactionSchema
 
 
 class TransactionRepository:
@@ -89,7 +89,7 @@ class TransactionRepository:
 
             return result
         except Exception as e:  # noqa: BLE001
-            from services.chat import get_chat_service
+            from fetcher.services.chat import get_chat_service
 
             main_logger.exception(
                 {

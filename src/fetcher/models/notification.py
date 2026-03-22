@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from models.base import BaseModel
+from fetcher.models.base import BaseModel
 
 
 class NotificationModel(BaseModel):

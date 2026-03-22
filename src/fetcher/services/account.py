@@ -1,14 +1,14 @@
 import json
 import time
 
-import db
-from logger import db_logger
-from models.account import AccountModel
-from providers.account.get import get_provider_class
-from repository import settings
-from repository.account import AccountRepository
-from schemas.account import CreateAccountSchema
-from utils import handle_service_exception
+from fetcher import db
+from fetcher.logger import db_logger
+from fetcher.models.account import AccountModel
+from fetcher.providers.account.get import get_provider_class
+from fetcher.repository import settings
+from fetcher.repository.account import AccountRepository
+from fetcher.schemas.account import CreateAccountSchema
+from fetcher.utils import handle_service_exception
 
 
 class AccountService:

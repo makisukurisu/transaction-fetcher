@@ -2,11 +2,11 @@ from typing import TYPE_CHECKING
 
 import telebot
 
-from providers.notification.base import BaseChatProvider
-from repository import settings
+from fetcher.providers.notification.base import BaseChatProvider
+from fetcher.repository import settings
 
 if TYPE_CHECKING:
-    from models.chat import ChatModel
+    from fetcher.models.chat import ChatModel
 
 
 class TelegramChatProvider(BaseChatProvider):

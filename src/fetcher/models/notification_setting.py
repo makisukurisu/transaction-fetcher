@@ -4,16 +4,16 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from enums.notification_setting import NotificationType
-from models.base import BaseModel
-from repository import settings
-from services.currency import get_currency_by_numerical_code
+from fetcher.enums.notification_setting import NotificationType
+from fetcher.models.base import BaseModel
+from fetcher.repository import settings
+from fetcher.services.currency import get_currency_by_numerical_code
 
 if TYPE_CHECKING:
-    from models.account_chat_model import AccountChatModel
-    from schemas.account import BalanceSchema
-    from schemas.notification import UnansweredNotificationSchema
-    from schemas.transaction import DBTransactionSchema
+    from fetcher.models.account_chat_model import AccountChatModel
+    from fetcher.schemas.account import BalanceSchema
+    from fetcher.schemas.notification import UnansweredNotificationSchema
+    from fetcher.schemas.transaction import DBTransactionSchema
 
 
 class NotificationSettingsModel(BaseModel):

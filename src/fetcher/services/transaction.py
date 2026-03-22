@@ -1,17 +1,17 @@
 import time
 from typing import TYPE_CHECKING
 
-import db
-from logger import main_logger
-from repository import settings
-from repository.transaction import TransactionRepository
-from services.notification import get_notification_service
-from utils import handle_service_exception
+from fetcher import db
+from fetcher.logger import main_logger
+from fetcher.repository import settings
+from fetcher.repository.transaction import TransactionRepository
+from fetcher.services.notification import get_notification_service
+from fetcher.utils import handle_service_exception
 
 if TYPE_CHECKING:
-    from models.transaction import TransactionModel
-    from schemas.account import BalanceSchema
-    from schemas.transaction import DBTransactionSchema
+    from fetcher.models.transaction import TransactionModel
+    from fetcher.schemas.account import BalanceSchema
+    from fetcher.schemas.transaction import DBTransactionSchema
 
 
 class TransactionService:

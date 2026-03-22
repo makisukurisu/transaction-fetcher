@@ -1,12 +1,13 @@
+import json
 from datetime import timedelta
 
 from sqlalchemy import Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from enums.account import AccountProvider
-from models.account_chat_model import AccountChatModel
-from models.base import BaseModel
-from models.transaction import TransactionModel
+from fetcher.enums.account import AccountProvider
+from fetcher.models.account_chat_model import AccountChatModel
+from fetcher.models.base import BaseModel
+from fetcher.models.transaction import TransactionModel
 
 
 class AccountModel(BaseModel):
@@ -31,8 +32,6 @@ class AccountModel(BaseModel):
         """
         Convert the JSON string to a dictionary.
         """
-        import json
-
         return json.loads(self.configuration_parameters)
 
     # How far back in time to look for new data

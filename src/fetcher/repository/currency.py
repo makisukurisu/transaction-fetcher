@@ -1,7 +1,7 @@
 import json
 
-from logger import main_logger
-from schemas.currency import CurrencySchema
+from fetcher.logger import main_logger
+from fetcher.schemas.currency import CurrencySchema
 
 
 class CurrencyRepository:

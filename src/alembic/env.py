@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-from repository import settings
+from fetcher.repository import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -19,7 +19,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 
-from models.base import BaseModel  # noqa: E402
+from fetcher.models.base import BaseModel  # noqa: E402
 
 target_metadata = BaseModel.metadata
 

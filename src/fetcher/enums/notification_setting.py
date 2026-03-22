@@ -1,11 +1,11 @@
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-from enums.transaction import TransactionType
+from fetcher.enums.transaction import TransactionType
 
 if TYPE_CHECKING:
-    from models.transaction import TransactionModel
-    from schemas.transaction import DBTransactionSchema
+    from fetcher.models.transaction import TransactionModel
+    from fetcher.schemas.transaction import DBTransactionSchema
 
 
 class NotificationType(StrEnum):

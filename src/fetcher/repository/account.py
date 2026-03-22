@@ -3,9 +3,9 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Session
 
-from models.account import AccountModel
-from models.account_chat_model import AccountChatModel
-from schemas.account import CreateAccountSchema
+from fetcher.models.account import AccountModel
+from fetcher.models.account_chat_model import AccountChatModel
+from fetcher.schemas.account import CreateAccountSchema
 
 if TYPE_CHECKING:
     import sqlalchemy

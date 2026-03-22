@@ -5,9 +5,9 @@ from decimal import Decimal
 
 import pydantic
 
-from enums.account import AccountProvider
-from schemas.base import BaseSchema
-from schemas.chat import ChatSchema
+from fetcher.enums.account import AccountProvider
+from fetcher.schemas.base import BaseSchema
+from fetcher.schemas.chat import ChatSchema
 
 
 class CreateAccountSchema(BaseSchema):

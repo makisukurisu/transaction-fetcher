@@ -9,12 +9,12 @@ import pydantic
 import pytz
 import rsa
 
-from enums.transaction import TransactionType
-from logger import main_logger
-from providers.account.base import BaseAccountProvider, BaseAccountProviderConfiguration
-from schemas.account import BalanceSchema
-from schemas.base import BaseSchema
-from schemas.transaction import TransactionSchema
+from fetcher.enums.transaction import TransactionType
+from fetcher.logger import main_logger
+from fetcher.providers.account.base import BaseAccountProvider, BaseAccountProviderConfiguration
+from fetcher.schemas.account import BalanceSchema
+from fetcher.schemas.base import BaseSchema
+from fetcher.schemas.transaction import TransactionSchema
 
 abank_timezone = pytz.timezone("Europe/Kyiv")
 

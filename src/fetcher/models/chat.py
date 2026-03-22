@@ -1,9 +1,9 @@
 from sqlalchemy import Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from enums.chat import ChatProvider
-from models.account_chat_model import AccountChatModel
-from models.base import BaseModel
+from fetcher.enums.chat import ChatProvider
+from fetcher.models.account_chat_model import AccountChatModel
+from fetcher.models.base import BaseModel
 
 
 class ChatModel(BaseModel):

@@ -2,12 +2,12 @@ from typing import TYPE_CHECKING, TypeVar
 
 import httpx
 
-from schemas.base import BaseSchema
+from fetcher.schemas.base import BaseSchema
 
 if TYPE_CHECKING:
-    from models.account import AccountModel
-    from schemas.account import BalanceSchema
-    from schemas.transaction import TransactionSchema
+    from fetcher.models.account import AccountModel
+    from fetcher.schemas.account import BalanceSchema
+    from fetcher.schemas.transaction import TransactionSchema
 
 
 class BaseAccountProviderConfiguration(BaseSchema):

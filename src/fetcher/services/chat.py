@@ -1,16 +1,16 @@
 from typing import TYPE_CHECKING
 
-import db
-from enums.chat import ChatProvider
-from models.chat import ChatModel
-from providers.notification.get import get_chat_provider_class
-from repository import settings
-from repository.chat import ChatRepository
-from schemas.chat import ListChatSchema
+from fetcher import db
+from fetcher.enums.chat import ChatProvider
+from fetcher.models.chat import ChatModel
+from fetcher.providers.notification.get import get_chat_provider_class
+from fetcher.repository import settings
+from fetcher.repository.chat import ChatRepository
+from fetcher.schemas.chat import ListChatSchema
 
 if TYPE_CHECKING:
-    from models.account_chat_model import AccountChatModel
-    from schemas.chat import CreateChatSchema
+    from fetcher.models.account_chat_model import AccountChatModel
+    from fetcher.schemas.chat import CreateChatSchema
 
 
 class ChatService:

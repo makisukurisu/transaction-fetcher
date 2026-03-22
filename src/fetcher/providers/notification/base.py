@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.chat import ChatModel
+    from fetcher.models.chat import ChatModel
 
 
 class BaseChatProvider:

@@ -5,13 +5,13 @@ import pydantic
 import pydantic.alias_generators
 import pytz
 
-from enums.transaction import TransactionType
-from providers.account.base import BaseAccountProvider, BaseAccountProviderConfiguration
-from repository import settings
-from schemas.account import BalanceSchema
-from schemas.base import BaseSchema
-from schemas.transaction import TransactionSchema
-from services.currency import get_currency_by_numerical_code
+from fetcher.enums.transaction import TransactionType
+from fetcher.providers.account.base import BaseAccountProvider, BaseAccountProviderConfiguration
+from fetcher.repository import settings
+from fetcher.schemas.account import BalanceSchema
+from fetcher.schemas.base import BaseSchema
+from fetcher.schemas.transaction import TransactionSchema
+from fetcher.services.currency import get_currency_by_numerical_code
 
 monobank_timezone = pytz.timezone("UTC")
 

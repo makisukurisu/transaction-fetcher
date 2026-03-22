@@ -1,5 +1,5 @@
-from repository.currency import CurrencyRepository
-from schemas.currency import CurrencySchema
+from fetcher.repository.currency import CurrencyRepository
+from fetcher.schemas.currency import CurrencySchema
 
 
 class CurrencyService:

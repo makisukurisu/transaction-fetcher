@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from enums.transaction import TransactionType
-from models.base import BaseModel
-from repository import settings
-from utils import amount_with_sign
+from fetcher.enums.transaction import TransactionType
+from fetcher.models.base import BaseModel
+from fetcher.repository import settings
+from fetcher.utils import amount_with_sign
 
 if TYPE_CHECKING:
-    from models.account import AccountModel
+    from fetcher.models.account import AccountModel
 
 
 class TransactionModel(BaseModel):

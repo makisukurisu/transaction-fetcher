@@ -1,10 +1,10 @@
 import datetime
 from decimal import Decimal
 
-from enums.transaction import TransactionType
-from schemas.account import AccountSchema
-from schemas.base import BaseSchema
-from schemas.currency import CurrencySchema
+from fetcher.enums.transaction import TransactionType
+from fetcher.schemas.account import AccountSchema
+from fetcher.schemas.base import BaseSchema
+from fetcher.schemas.currency import CurrencySchema
 
 
 class TransactionSchema(BaseSchema):

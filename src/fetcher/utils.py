@@ -18,13 +18,14 @@ def handle_service_exception(
         service_name: The name of the service for logging purposes
         logger: The logger to use for error logging
     """
+
     def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                from services.chat import get_chat_service  # noqa: PLC0415
+                from fetcher.services.chat import get_chat_service  # noqa: PLC0415
 
                 logger.critical(
                     f"Error in {service_name}: {e}",

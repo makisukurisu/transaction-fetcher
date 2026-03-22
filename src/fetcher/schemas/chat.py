@@ -1,5 +1,5 @@
-from enums.chat import ChatProvider
-from schemas.base import BaseSchema
+from fetcher.enums.chat import ChatProvider
+from fetcher.schemas.base import BaseSchema
 
 
 class CreateChatSchema(BaseSchema):

@@ -1,7 +1,7 @@
 import logging
 import logging.handlers
 
-from repository.settings import settings
+from fetcher.repository.settings import settings
 
 db_logger = logging.getLogger("db")
 

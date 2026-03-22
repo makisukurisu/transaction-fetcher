@@ -2,14 +2,14 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Session, joinedload
 
-from enums.chat import ChatProvider
-from models.account_chat_model import AccountChatModel
-from models.chat import ChatModel
+from fetcher.enums.chat import ChatProvider
+from fetcher.models.account_chat_model import AccountChatModel
+from fetcher.models.chat import ChatModel
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
-    from schemas.chat import CreateChatSchema
+    from fetcher.schemas.chat import CreateChatSchema
 
 
 class ChatRepository:

@@ -74,7 +74,7 @@ def migrate() -> None:
     """
     Run the migrations.
     """
-    from models.base import BaseModel
+    from fetcher.models.base import BaseModel
 
     BaseModel.metadata.create_all(
         get_engine(settings.settings.DB_URL),

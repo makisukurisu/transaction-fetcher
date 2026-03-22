@@ -3,15 +3,15 @@ from typing import TYPE_CHECKING
 
 import pydantic
 
-from enums.notification_setting import NotificationType
-from repository import settings
-from schemas.account import AccountChatSchema, BalanceSchema
-from schemas.base import BaseSchema
-from services.currency import get_currency_by_numerical_code
-from utils import amount_with_sign_and_space, amount_with_spaces
+from fetcher.enums.notification_setting import NotificationType
+from fetcher.repository import settings
+from fetcher.schemas.account import AccountChatSchema, BalanceSchema
+from fetcher.schemas.base import BaseSchema
+from fetcher.services.currency import get_currency_by_numerical_code
+from fetcher.utils import amount_with_sign_and_space, amount_with_spaces
 
 if TYPE_CHECKING:
-    from models.transaction import TransactionModel
+    from fetcher.models.transaction import TransactionModel
 
 
 class CreateNotificationSchema(BaseSchema):

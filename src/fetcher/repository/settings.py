@@ -7,7 +7,7 @@ import pytz
 
 class Settings(pydantic_settings.BaseSettings):
     DB_URL: pydantic.AnyUrl = pydantic.Field(
-        default="sqlite:///./test.db",
+        default=pydantic.AnyUrl("sqlite:///./test.db"),
         description="Database URL. Can be a SQLite, PostgreSQL, or MySQL URL. Tested only with SQLite.",  # noqa: E501
     )
 
@@ -37,4 +37,4 @@ class Settings(pydantic_settings.BaseSettings):
     )
 
 
-settings = Settings()
+settings = Settings()  # pyright: ignore[reportCallIssue]

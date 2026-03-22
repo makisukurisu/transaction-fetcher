@@ -1,4 +1,4 @@
-from schemas.base import BaseSchema
+from fetcher.schemas.base import BaseSchema
 
 
 class CurrencySchema(BaseSchema):
