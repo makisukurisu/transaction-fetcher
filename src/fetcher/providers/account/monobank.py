@@ -12,6 +12,7 @@ from fetcher.schemas.account import BalanceSchema
 from fetcher.schemas.base import BaseSchema
 from fetcher.schemas.transaction import TransactionSchema
 from fetcher.services.currency import get_currency_by_numerical_code
+from src.fetcher.utils import amount_with_sign
 
 monobank_timezone = pytz.timezone("UTC")
 
@@ -103,9 +104,9 @@ class MonoBankTransaction(BaseMonoBankSchema):
 
         amount = self.amount
 
-        if self.operation_amount is not None:
+        if self.operation_amount is not None and self.operation_amount != self.amount:
             amount = self.operation_amount
-            description += f"\nСума в оригінальній валюті: {Decimal(self.amount) / 100}"  # noqa: RUF001
+            description += f"\nСума в оригінальній валюті: {amount_with_sign(round(Decimal(self.amount) / 100, 2))}"  # noqa: E501, RUF001
 
         return TransactionSchema(
             unique_id=self.id,
