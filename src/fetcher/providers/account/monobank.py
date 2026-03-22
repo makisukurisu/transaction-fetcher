@@ -101,10 +101,12 @@ class MonoBankTransaction(BaseMonoBankSchema):
 
         description = description.strip()
 
+        amount = self.operation_amount if self.operation_amount is not None else self.amount
+
         return TransactionSchema(
             unique_id=self.id,
-            type=TransactionType.DEPOSIT if self.amount > 0 else TransactionType.WITHDRAWAL,
-            amount=Decimal(self.amount) / 100,
+            type=TransactionType.DEPOSIT if amount > 0 else TransactionType.WITHDRAWAL,
+            amount=Decimal(amount) / 100,
             currency=get_currency_by_numerical_code(
                 self.currency_code,
             ),
