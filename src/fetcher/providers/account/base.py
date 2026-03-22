@@ -39,7 +39,7 @@ class BaseAccountProvider:
     def _make_http_client(self) -> "httpx.Client":
         return httpx.Client(
             base_url=self.base_url,
-            timeout=15,
+            timeout=30,
             headers={
                 "User-Agent": "CardInfoBot/3.0",
             },
