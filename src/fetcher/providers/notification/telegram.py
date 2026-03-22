@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 import telebot
+import telebot.util
 
 from fetcher.providers.notification.base import BaseChatProvider
 from fetcher.repository import settings
